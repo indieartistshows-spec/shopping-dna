@@ -58,6 +58,11 @@ Or force a production build without a commit:
 npx vercel --prod
 ```
 
+## Layout
+
+One responsive build. Under 900px it runs as a full-bleed app with a fixed bottom tab bar; at 900px and up it becomes a site with a top nav and a centred column. Add `?dev` to the URL for the screen-jump row.
+
 ## Version log
 
+- **0.2.0** — Responsive: real web app on mobile, website on desktop. Phone bezel removed.
 - **0.1.0** — Intro, upload, read, email gate, reveal, correct, weekly plan, shop. Neutral palette, Space Grotesk over Inter, twenty animal marks.
