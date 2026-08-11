@@ -232,8 +232,27 @@ function measureFit(mask, w, h, lm) {
 
 const CAT = { BACKGROUND:0, HAIR:1, BODY_SKIN:2, FACE_SKIN:3, CLOTHES:4, OTHER:5 };
 
+/* The region most likely to be clothing: below the shoulders when pose gives
+   them to us, otherwise the central lower two thirds of the frame. */
+function torsoBox(lm, w, h) {
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  if (lm && lm[11] && lm[12]) {
+    const sx = [lm[11].x, lm[12].x], sy = (lm[11].y + lm[12].y)/2;
+    const span = Math.max(0.12, Math.abs(sx[0]-sx[1]));
+    const cx = (sx[0]+sx[1])/2;
+    return {
+      x0: Math.round(clamp((cx - span*0.75)*w, 0, w-2)),
+      x1: Math.round(clamp((cx + span*0.75)*w, 2, w)),
+      y0: Math.round(clamp((sy + span*0.15)*h, 0, h-2)),
+      y1: Math.round(clamp((sy + span*2.4)*h, 2, h)),
+    };
+  }
+  return { x0: Math.round(w*0.22), x1: Math.round(w*0.78), y0: Math.round(h*0.34), y1: Math.round(h*0.94) };
+}
+
 function analyseFrame({ imageData, categoryMask, landmarks, w, h }) {
   const px = imageData.data;
+  let fellBack = false;
   const [kr,kg,kb] = whiteBalance(px);
   const clothes = new Uint8Array(w*h), gray = new Float32Array(w*h);
   const garmentLab = [], skinLab = [];
@@ -246,8 +265,34 @@ function analyseFrame({ imageData, categoryMask, landmarks, w, h }) {
     if (cat===CAT.CLOTHES) { clothes[i]=1; clothesCount++; if (i%7===0) garmentLab.push(rgbToLab(r,g,b)); }
     else if (cat===CAT.BODY_SKIN||cat===CAT.FACE_SKIN) { if (i%11===0) skinLab.push(rgbToLab(px[o],px[o+1],px[o+2])); }
   }
-  const coverage = clothesCount/(w*h);
-  if (coverage < 0.04 || garmentLab.length < 120) return { ok:false, reason:'Not enough garment visible' };
+  let coverage = clothesCount/(w*h);
+
+  /* The selfie segmenter is trained on portraits and often returns no
+     "clothes" class on unusual crops. Rather than refuse the photo, sample
+     the torso directly: from the pose when we have it, otherwise the middle
+     of the frame, excluding anything the model called skin, hair or
+     background. This is what makes almost any real photo usable. */
+  if (coverage < 0.012 || garmentLab.length < 40) {
+    const box = torsoBox(landmarks, w, h);
+    garmentLab.length = 0;
+    clothesCount = 0;
+    for (let y = box.y0; y < box.y1; y++) {
+      for (let x = box.x0; x < box.x1; x++) {
+        const i = y*w + x;
+        const cat = categoryMask[i];
+        if (cat === CAT.FACE_SKIN || cat === CAT.HAIR) continue;
+        clothes[i] = 1; clothesCount++;
+        if (i % 5 === 0) {
+          const o = i*4;
+          garmentLab.push(rgbToLab(
+            Math.min(255, px[o]*kr), Math.min(255, px[o+1]*kg), Math.min(255, px[o+2]*kb)));
+        }
+      }
+    }
+    coverage = clothesCount/(w*h);
+    if (garmentLab.length < 24) return { ok:false, reason:'Could not find an outfit here' };
+    fellBack = true;
+  }
 
   const prepared = normaliseGarment(garmentLab.slice(0, 4000));
   const clusters = kmeans(prepared, 4);
@@ -268,7 +313,7 @@ function analyseFrame({ imageData, categoryMask, landmarks, w, h }) {
   const family = familyRank[0][0];
   const familyConf = familyRank[0][1]/(familyRank.reduce((s,[,v])=>s+v,0)||1);
   const texture = classifyTexture(textureSignals(gray, clothes, w, h));
-  const fit = measureFit(clothes, w, h, landmarks);
+  const fit = landmarks ? measureFit(clothes, w, h, landmarks) : null;
 
   let skin = null;
   if (skinLab.length > 40) {
@@ -278,21 +323,26 @@ function analyseFrame({ imageData, categoryMask, landmarks, w, h }) {
     MONK.forEach((hex,i) => { const [r,g,b]=hexToRgb(hex); const d=deltaE(lab, rgbToLab(r,g,b)); if (d<bestD){bestD=d;bestI=i;} });
     skin = { monk:bestI, group:MONK_GROUP(bestI), lab, undertone: lab[2]>16?'warm':lab[2]<10?'cool':'neutral' };
   }
-  const quality = Math.min(1, 0.35+coverage*1.4) * (fit?1:0.6) * (texture?1:0.6);
-  return { ok:true, family, familyConf, dominant, texture, fit, skin, coverage, quality, clusters };
+  // Weighted down when a measurement is missing, never discarded.
+  const quality = Math.max(0.2, Math.min(1, 0.45+coverage*1.6) * (fit?1:0.75) * (texture?1:0.8) * (fellBack?0.7:1));
+  return { ok:true, family, familyConf, dominant, texture, fit, skin, coverage, quality, clusters, fellBack };
 }
 
-function validatePose(landmarks) {
-  if (!landmarks || !landmarks.length) return { ok:false, reason:'No person found' };
+/* Pose is used to measure CUT. It is not a gate: a photo with no usable pose
+   still yields colour and cloth, which is most of the identity. This returns
+   how much of the pose we trust rather than pass/fail. */
+function gradePose(landmarks) {
+  if (!landmarks || !landmarks.length) return { tier:'none' };
   const lm = landmarks, vis = i => (lm[i]?.visibility ?? 1);
-  const LS=11, RS=12, LH=23, RH=24, NOSE=0;
-  if (!(vis(LS)>0.5 && vis(RS)>0.5))
-    return vis(NOSE)>0.6 ? { ok:false, reason:'Too close up, outfit not visible' } : { ok:false, reason:'Body not clearly visible' };
-  if (!(vis(LH)>0.4 || vis(RH)>0.4)) return { ok:false, reason:'Cropped too tight, need more of the outfit' };
+  const LS=11, RS=12, LH=23, RH=24;
+  const shoulders = vis(LS) > 0.25 && vis(RS) > 0.25;
+  const hips = vis(LH) > 0.2 || vis(RH) > 0.2;
+  if (!shoulders) return { tier:'none' };
+  if (!hips) return { tier:'partial', landmarks:lm };
   const torso = Math.abs((lm[LH].y+lm[RH].y)/2 - (lm[LS].y+lm[RS].y)/2);
-  if (torso < 0.14) return { ok:false, reason:'Person too small in frame' };
-  if (torso > 0.85) return { ok:false, reason:'Too close up, outfit not visible' };
-  return { ok:true, torso };
+  // Only refuse the fit measurement at genuinely unusable extremes.
+  if (torso < 0.05 || torso > 0.96) return { tier:'partial', landmarks:lm };
+  return { tier:'full', landmarks:lm, torso };
 }
 
 export function aggregate(frames) {
@@ -321,6 +371,7 @@ export function aggregate(frames) {
     family:f, texture:t, fit:fi, species:SPECIES[f][t], name:`${EPITHET[fi]} ${SPECIES[f][t]}`,
     shares:{ family:Math.round((family?.share??0)*100), texture:Math.round((texture?.share??0)*100), fit:Math.round((fit?.share??0)*100) },
     confidence: Math.round(((family?.share??0.4)*0.4 + (texture?.share??0.4)*0.3 + (fit?.share??0.4)*0.3)*100),
+    fitMeasured: good.filter(f => f.analysis.fit).length,
     monk, undertone, palette,
     accent: palette[0]?.hex ?? '#8A8A8A',
     readCount: good.length, totalCount: frames.length,
@@ -420,9 +471,12 @@ export async function readPhoto(url) {
   const ctx = cv.getContext('2d', { willReadFrequently:true });
   ctx.drawImage(img, 0, 0, w, h);
 
-  const lm = m.pose.detect(cv).landmarks?.[0];
-  const gate = validatePose(lm);
-  if (!gate.ok) return { ok:false, reason:gate.reason };
+  let lm = null, poseTier = 'none';
+  try {
+    const graded = gradePose(m.pose.detect(cv).landmarks?.[0]);
+    poseTier = graded.tier;
+    if (graded.tier !== 'none') lm = graded.landmarks;
+  } catch { poseTier = 'none'; }
 
   const mask = m.seg.segment(cv).categoryMask;
   const cats = mask.getAsUint8Array();
@@ -436,7 +490,9 @@ export async function readPhoto(url) {
     }
   }
   mask.close();
-  return analyseFrame({ imageData: ctx.getImageData(0,0,w,h), categoryMask:catAligned, landmarks:lm, w, h });
+  const out = analyseFrame({ imageData: ctx.getImageData(0,0,w,h), categoryMask:catAligned, landmarks:lm, w, h });
+  if (out.ok) out.poseTier = poseTier;
+  return out;
 }
 
 /* ── demo result, for walking the flow without photos ──

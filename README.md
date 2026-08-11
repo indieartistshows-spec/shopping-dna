@@ -193,6 +193,10 @@ Five generations per account per calendar day, counted in `public.reads` and mir
 
 To change the limit, edit `DAILY_LIMIT` at the top of `quota.js`.
 
+## Photo acceptance
+
+Deliberately forgiving. Pose detection measures CUT but is no longer a gate — a photo with no usable pose still yields colour and cloth, which is most of the identity. When the portrait segmenter finds no clothing class (common on unusual crops) the engine samples the torso directly: from the shoulders when pose gives them, otherwise the central lower two thirds of the frame, excluding face and hair. Reads that lean on that fallback are weighted at roughly half a clean read rather than discarded, so leniency never quietly becomes inaccuracy. Only a frame with almost no usable pixels is refused.
+
 ## Why reads vary
 
 Two rules keep results distinct:
@@ -203,6 +207,7 @@ Two rules keep results distinct:
 
 ## Version log
 
+- **0.9.1** — Photo acceptance loosened substantially: pose is advisory, a torso fallback rescues frames the segmenter can't parse, and weak reads are down-weighted rather than rejected. Multi-select upload fixed (the `multiple` attribute was never applied), files now land in the grid together and are read in parallel. Drag and drop added.
 - **0.9.0** — Input is now a four-photo 2×2 grid instead of nine; usable floor drops to three.
 - **0.8.1** — Brand picker actions pinned to the bottom of the viewport on phone and desktop. Custom labels are saved to Supabase and merged into everyone's list.
 - **0.8.0** — Five reads per account per day, enforced against Supabase with row-level security. At the cap the first-screen button offers the account's latest card instead of a new read.

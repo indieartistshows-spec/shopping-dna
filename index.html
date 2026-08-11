@@ -103,36 +103,47 @@ a:hover{color:var(--color-text)}
       <sc-if value="{{ atUpload }}" hint-placeholder-val="{{ true }}">
         <div style="{{ uploadColStyle }}">
           <h2 style="margin:0;font-family:var(--font-heading);font-weight:700;font-size:28px;line-height:1;letter-spacing:-.02em;text-transform:uppercase">Four photos. Any four.</h2>
-          <p style="margin:10px 0 0;font-size:13.5px;line-height:1.45;color:var(--color-neutral-800)">Full or three quarter shots with the outfit showing. Faces optional. We are not here for your face.</p>
+          <p style="margin:10px 0 0;font-size:13.5px;line-height:1.45;color:var(--color-neutral-800)">Anything with your clothes in it. Cropped, angled, badly lit, no face — we will work with it.</p>
 
           <div style="margin-top:20px;display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--color-text);padding-bottom:8px">
             <span style="font:700 10px/1 var(--font-body);letter-spacing:.18em;text-transform:uppercase">The four</span>
             <span style="font-family:var(--font-heading);font-weight:700;font-size:15px;letter-spacing:-.01em">{{ slotCount }}</span>
           </div>
 
-          <div style="{{ slotGridStyle }}">
-            <sc-for list="{{ slots }}" as="s" hint-placeholder-count="0">
-              <div style="position:relative;aspect-ratio:3/4;background:var(--color-neutral-200);overflow:hidden">
-                <sc-if value="{{ s.filled }}">
-                  <div style="{{ s.imgStyle }}"></div>
-                  <div style="{{ s.sweepStyle }}"></div>
-                  <div style="{{ s.flagStyle }}">{{ s.flag }}</div>
-                  <button onClick="{{ s.remove }}" style="position:absolute;top:0;right:0;width:24px;height:24px;border:none;background:var(--color-text);color:var(--color-neutral-100);font:700 12px/1 var(--font-body);cursor:pointer">×</button>
-                </sc-if>
-                <sc-if value="{{ s.empty }}">
-                  <button onClick="{{ pickFiles }}" style="{{ s.emptyStyle }}" style-hover="background:var(--color-neutral-300)" style-active="background:var(--color-neutral-400)">
-                    <span style="font:700 10px/1 var(--font-body);letter-spacing:.14em;color:var(--color-neutral-600)">{{ s.n }}</span>
-                    <span style="{{ s.plusStyle }}">{{ s.plus }}</span>
-                  </button>
-                </sc-if>
+          <div onDrop="{{ onDrop }}" onDragOver="{{ onDragOver }}" onDragLeave="{{ onDragLeave }}" style="{{ dropZoneStyle }}">
+            <div style="{{ slotGridStyle }}">
+              <sc-for list="{{ slots }}" as="s" hint-placeholder-count="4">
+                <div style="position:relative;aspect-ratio:3/4;background:var(--color-neutral-200);overflow:hidden">
+                  <sc-if value="{{ s.filled }}">
+                    <div style="{{ s.imgStyle }}"></div>
+                    <div style="{{ s.sweepStyle }}"></div>
+                    <div style="{{ s.badgeStyle }}">{{ s.n }}</div>
+                    <div style="{{ s.flagStyle }}">{{ s.flag }}</div>
+                    <button onClick="{{ s.remove }}" style="position:absolute;top:0;right:0;width:28px;height:28px;border:none;background:var(--color-text);color:var(--color-neutral-100);font:700 13px/1 var(--font-body);cursor:pointer" style-hover="background:var(--color-neutral-800)">×</button>
+                  </sc-if>
+                  <sc-if value="{{ s.empty }}">
+                    <button onClick="{{ pickFiles }}" style="{{ s.emptyStyle }}" style-hover="background:var(--color-neutral-300)" style-active="background:var(--color-neutral-400)">
+                      <span style="font:700 10px/1 var(--font-body);letter-spacing:.14em;color:var(--color-neutral-600)">{{ s.n }}</span>
+                      <span style="{{ s.plusStyle }}">{{ s.plus }}</span>
+                    </button>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+            <sc-if value="{{ dragging }}">
+              <div style="position:absolute;inset:0;z-index:5;background:color-mix(in srgb, var(--color-text) 84%, transparent);color:var(--color-neutral-100);display:flex;align-items:center;justify-content:center;pointer-events:none">
+                <span style="font-family:var(--font-heading);font-weight:700;font-size:20px;letter-spacing:-.01em;text-transform:uppercase">Drop them here</span>
               </div>
-            </sc-for>
+            </sc-if>
           </div>
-          <input type="file" accept="image/*,.heic,.heif" multiple="" ref="{{ fileRef }}" onChange="{{ onFiles }}" style="display:none;position:absolute;width:0;height:0;opacity:0">
+          <input type="file" accept="image/*,.heic,.heif" multiple="{{ true }}" ref="{{ fileRef }}" onChange="{{ onFiles }}" style="display:none;position:absolute;width:0;height:0;opacity:0">
 
-          <button onClick="{{ pickFiles }}" style="margin-top:10px;width:100%;border:2px solid var(--color-text);background:transparent;padding:14px 16px;cursor:pointer;text-align:left;color:var(--color-text);display:flex;justify-content:space-between;align-items:center" style-hover="background:var(--color-neutral-200)" style-active="background:var(--color-neutral-300)">
-            <span style="font:700 11px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase">Grab from camera roll</span>
-            <span style="font:700 13px/1 var(--font-body)">+</span>
+          <button onClick="{{ pickFiles }}" style="{{ pickBtnStyle }}">
+            <span style="display:flex;flex-direction:column;gap:5px;min-width:0">
+              <span style="font:700 11px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase">{{ pickLabel }}</span>
+              <span style="font:400 11.5px/1.3 var(--font-body);color:var(--color-neutral-700)">{{ pickHint }}</span>
+            </span>
+            <span style="font-family:var(--font-heading);font-weight:700;font-size:22px;line-height:1;flex:none">+</span>
           </button>
 
           <sc-if value="{{ hasFrames }}" hint-placeholder-val="{{ true }}">
@@ -613,7 +624,7 @@ class Component extends DCLogic {
   state = {
     screen: 'intro', tab: 'today', frames: [], result: null, monk: 4,
     accuracy: 78, day: new Date().getDay() === 0 ? 6 : new Date().getDay() - 1,
-    seed: 0, worn: {}, shareOpen: false, brands: [], brandQuery: '', brandSeg: 'All', brandNote: '',
+    seed: 0, worn: {}, shareOpen: false, brands: [], brandQuery: '', brandSeg: 'All', brandNote: '', dragging: false,
     procIdx: 0, procPct: 0, segPct: 0, tick: 0, procDone: false,
     gateOpen: false, gateError: '', gateBusy: false, leadStored: null, user: null, quota: null, isDesktop: false, dev: false, copied: false, engineNote: '',
   };
@@ -717,18 +728,51 @@ class Component extends DCLogic {
   }
 
   /* ── photo intake ── */
-  onFiles = async e => {
+  /* Every picked file lands in the grid at once, then all four are read in
+     parallel — no waiting for one before the next appears. */
+  intake = async fileList => {
     const eng = await this.load();
-    const files = [...e.target.files].filter(f => f.type.startsWith('image/') || /heic|heif/i.test(f.name));
+    const files = [...fileList].filter(f => f.type.startsWith('image/') || /heic|heif/i.test(f.name));
+    if (!files.length) return;
     const room = 4 - this.state.frames.length;
-    for (const file of files.slice(0, room)) {
-      const blob = await eng.decodeHeic(file);
-      const frame = { id: Math.random().toString(36).slice(2), url: URL.createObjectURL(blob), status: 'busy', analysis: null, reason: null };
-      this.setState(s => ({ frames: [...s.frames, frame] }));
-      this.run(frame, eng);
-    }
-    e.target.value = '';
+    const batch = files.slice(0, room);
+    const skipped = files.length - batch.length;
+
+    const frames = batch.map(file => ({
+      id: Math.random().toString(36).slice(2),
+      file,
+      url: null,
+      status: 'busy',
+      analysis: null,
+      reason: null,
+    }));
+    this.setState(s => ({
+      frames: [...s.frames, ...frames],
+      engineNote: skipped > 0 ? `Four is the limit, so ${skipped} ${skipped > 1 ? 'were' : 'was'} left out.` : '',
+    }));
+
+    await Promise.all(frames.map(async frame => {
+      try {
+        const blob = await eng.decodeHeic(frame.file);
+        frame.url = URL.createObjectURL(blob);
+        this.forceUpdate();
+        await this.run(frame, eng);
+      } catch {
+        Object.assign(frame, { status: 'bad', reason: 'Could not open this file' });
+        this.forceUpdate();
+      }
+    }));
   };
+
+  onFiles = e => { this.intake(e.target.files); e.target.value = ''; };
+
+  onDrop = e => {
+    e.preventDefault();
+    this.setState({ dragging: false });
+    if (e.dataTransfer?.files?.length) this.intake(e.dataTransfer.files);
+  };
+  onDragOver = e => { e.preventDefault(); if (!this.state.dragging) this.setState({ dragging: true }); };
+  onDragLeave = e => { e.preventDefault(); this.setState({ dragging: false }); };
 
   async run(frame, eng) {
     try {
@@ -934,6 +978,7 @@ class Component extends DCLogic {
     const reasons = Object.entries(bad.reduce((m, f) => (m[f.reason] = (m[f.reason] || 0) + 1, m), {}))
       .map(([k, n]) => `${n} ${n > 1 ? 'photos' : 'photo'}: ${k.toLowerCase()}`);
     const ready = good >= 3 && !busy;
+    const partialCount = s.frames.filter(x => x.status === 'ok' && !x.analysis?.fit).length;
 
     const week = r && eng ? eng.weekPlan(r, s.seed) : [];
     const today = week[s.day] || null;
@@ -996,11 +1041,21 @@ class Component extends DCLogic {
       uploadColStyle: `padding-top:22px;width:100%;${s.isDesktop ? 'max-width:400px' : ''}`,
       slotGridStyle: 'margin-top:2px;display:grid;grid-template-columns:repeat(2,1fr);gap:2px;background:var(--color-divider);border-bottom:2px solid var(--color-text)',
       slotCount: `${s.frames.length} / 4`,
+      dragging: s.dragging,
+      onDrop: this.onDrop,
+      onDragOver: this.onDragOver,
+      onDragLeave: this.onDragLeave,
+      dropZoneStyle: `position:relative;margin-top:2px;outline:${s.dragging ? '3px solid var(--color-text)' : 'none'};outline-offset:2px;transition:outline-color .15s ease`,
+      pickLabel: s.frames.length ? 'Add more' : 'Choose your photos',
+      pickHint: s.frames.length
+        ? `Room for ${4 - s.frames.length} more`
+        : 'Select all four at once, or drag them in',
+      pickBtnStyle: `margin-top:12px;width:100%;border:2px solid var(--color-text);background:${s.frames.length >= 4 ? 'var(--color-neutral-200)' : 'transparent'};padding:14px 16px;cursor:${s.frames.length >= 4 ? 'not-allowed' : 'pointer'};text-align:left;color:var(--color-text);display:flex;justify-content:space-between;align-items:center;gap:14px;opacity:${s.frames.length >= 4 ? .5 : 1}`,
       uploadTips: [
-        { k: 'Do', v: 'Whole outfit in frame, shoulders to knees' },
-        { k: 'Do', v: 'Mirror shots, holiday pics, anything real' },
-        { k: 'Skip', v: 'Head and shoulders only' },
-        { k: 'Skip', v: 'Group shots where you are a speck' },
+        { k: 'Best', v: 'Outfit in frame, shoulders down' },
+        { k: 'Fine', v: 'Mirror shots, holiday pics, old favourites' },
+        { k: 'Fine', v: 'Cropped, sideways, half in shadow' },
+        { k: 'Works', v: 'Anything with clothes in it, really' },
       ],
       slots: Array.from({ length: 4 }, (_, i) => {
         const f = s.frames[i];
@@ -1015,17 +1070,23 @@ class Component extends DCLogic {
         };
         return {
           filled: true, empty: false, n,
-          url: f.url || 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
-          imgStyle: `position:absolute;inset:0;background-image:url("${f.url}");background-size:cover;background-position:center;${f.status === 'bad' ? 'filter:grayscale(1);opacity:.3' : 'filter:grayscale(1) contrast(1.04)'}`,
+          imgStyle: f.url
+            ? `position:absolute;inset:0;background-image:url("${f.url}");background-size:cover;background-position:center;${f.status === 'bad' ? 'filter:grayscale(1);opacity:.25' : 'filter:grayscale(1) contrast(1.05)'}`
+            : 'position:absolute;inset:0;background:var(--color-neutral-300)',
+          badgeStyle: `position:absolute;top:0;left:0;background:${f.status === 'ok' ? 'var(--color-neutral-100)' : 'var(--color-text)'};color:${f.status === 'ok' ? 'var(--color-text)' : 'var(--color-neutral-100)'};font:700 9.5px/1 var(--font-body);letter-spacing:.12em;padding:6px 7px`,
           sweepStyle: f.status === 'busy'
-            ? 'position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.6),transparent);animation:sdnaSweep 1.1s linear infinite'
+            ? 'position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.65),transparent);animation:sdnaSweep 1.1s linear infinite'
             : 'display:none',
           flagStyle: f.status === 'bad'
-            ? 'position:absolute;left:0;right:0;bottom:0;background:var(--color-text);color:var(--color-neutral-100);font:600 9px/1.3 var(--font-body);letter-spacing:.06em;text-transform:uppercase;padding:5px 6px'
+            ? 'position:absolute;left:0;right:0;bottom:0;background:var(--color-neutral-700);color:var(--color-neutral-100);font:600 9px/1.35 var(--font-body);letter-spacing:.05em;text-transform:uppercase;padding:6px 7px'
             : f.status === 'ok'
-              ? 'position:absolute;left:0;right:0;bottom:0;background:var(--color-neutral-900);color:var(--color-neutral-100);font:600 9px/1.3 var(--font-body);letter-spacing:.06em;text-transform:uppercase;padding:5px 6px'
+              ? `position:absolute;left:0;right:0;bottom:0;background:${f.analysis?.fit ? 'var(--color-text)' : 'var(--color-neutral-800)'};color:var(--color-neutral-100);font:600 9px/1.35 var(--font-body);letter-spacing:.05em;text-transform:uppercase;padding:6px 7px`
               : 'display:none',
-          flag: f.status === 'bad' ? f.reason : f.analysis?.dominant?.name || '',
+          flag: f.status === 'bad'
+            ? f.reason
+            : f.status === 'ok' && !f.analysis?.fit
+              ? `${f.analysis?.dominant?.name || 'Read'} · colour only`
+              : f.analysis?.dominant?.name || '',
           remove: () => this.setState(st => ({ frames: st.frames.filter(x => x.id !== f.id) })),
         };
       }),
@@ -1046,8 +1107,12 @@ class Component extends DCLogic {
       meterCount: `${good} / ${s.frames.length} usable`,
       meterBarStyle: `position:absolute;left:0;top:0;bottom:0;background:var(--color-text);width:${Math.min(100, (good / 4) * 100)}%;transition:width .4s ease`,
       meterNote: s.engineNote || (good >= 3
-        ? (reasons.length ? reasons.join(' · ') + '. Enough to read you.' : 'Good set. A fourth sharpens it.')
-        : (reasons.length ? reasons.join(' · ') : 'Three usable photos is the floor.')),
+        ? (partialCount
+            ? partialCount + (partialCount > 1 ? ' gave colour only' : ' gave colour only') + '. Enough to go on.'
+            : 'Clean set. Every photo read fully.')
+        : good > 0
+          ? good + ' read so far. Three is the floor.'
+          : (reasons.length ? reasons.join(' \u00b7 ') : 'Add a few and we will read what we can.')),
       notReady: !ready,
       analyse: this.analyse,
       analyseStyle: `width:100%;border:none;padding:17px 18px;font:700 14px/1 var(--font-body);text-align:left;cursor:${ready ? 'pointer' : 'not-allowed'};background:${ready ? 'var(--color-text)' : 'var(--color-neutral-300)'};color:${ready ? 'var(--color-neutral-100)' : 'var(--color-neutral-600)'}`,
