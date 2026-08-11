@@ -10,10 +10,15 @@
 <helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="_ds/modernist-29c04e61-b26d-4267-b3e9-9088ce55ff37/styles.css">
-<script src="_ds/modernist-29c04e61-b26d-4267-b3e9-9088ce55ff37/_ds_bundle.js"></script>
 <style>
-:root{--font-heading:'Space Grotesk',system-ui,sans-serif;--font-body:'Inter',system-ui,sans-serif;--ink:#201e1d;--sheet:rgba(32,30,29,.62)}
+:root{
+--font-heading:'Space Grotesk',system-ui,sans-serif;--font-body:'Inter',system-ui,sans-serif;
+--color-bg:#f3f2f2;--color-surface:#eae9e9;--color-text:#201e1d;
+--color-divider:rgba(32,30,29,.4);
+--color-neutral-100:#f8f4f4;--color-neutral-200:#eae7e7;--color-neutral-300:#d7d3d3;
+--color-neutral-400:#bab6b6;--color-neutral-500:#9b9797;--color-neutral-600:#7d7979;
+--color-neutral-700:#605d5d;--color-neutral-800:#444141;--color-neutral-900:#2d2b2b;
+--ink:#201e1d;--sheet:rgba(32,30,29,.62)}
 *,*::before,*::after{box-sizing:border-box}
 html,body{margin:0;max-width:100%;overflow-x:hidden;overscroll-behavior-y:none}
 body{background:var(--color-bg);font-family:var(--font-body);-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
@@ -93,7 +98,7 @@ a:hover{color:var(--color-text)}
 
       <!-- ══ UPLOAD ══ -->
       <sc-if value="{{ atUpload }}" hint-placeholder-val="{{ true }}">
-        <div style="padding-top:22px">
+        <div style="{{ uploadColStyle }}">
           <h2 style="margin:0;font-family:var(--font-heading);font-weight:700;font-size:28px;line-height:1;letter-spacing:-.02em;text-transform:uppercase">Nine photos. Any nine.</h2>
           <p style="margin:10px 0 0;font-size:13.5px;line-height:1.45;color:var(--color-neutral-800)">Full or three quarter shots with the outfit showing. Faces optional. We are not here for your face.</p>
 
@@ -102,7 +107,7 @@ a:hover{color:var(--color-text)}
             <span style="font-family:var(--font-heading);font-weight:700;font-size:15px;letter-spacing:-.01em">{{ slotCount }}</span>
           </div>
 
-          <div style="margin-top:2px;display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--color-divider);border-bottom:2px solid var(--color-text)">
+          <div style="{{ slotGridStyle }}">
             <sc-for list="{{ slots }}" as="s" hint-placeholder-count="0">
               <div style="position:relative;aspect-ratio:3/4;background:var(--color-neutral-200);overflow:hidden">
                 <sc-if value="{{ s.filled }}">
@@ -338,7 +343,7 @@ a:hover{color:var(--color-text)}
             <h2 style="margin:8px 0 0;font-family:var(--font-heading);font-weight:700;font-size:32px;line-height:.95;letter-spacing:-.01em;text-transform:uppercase">{{ dayOccasion }}</h2>
           </div>
 
-          <div style="display:flex;height:200px;border-top:2px solid var(--color-text);border-bottom:2px solid var(--color-text)">
+          <div style="{{ dayBlocksStyle }}">
             <sc-for list="{{ dayColors }}" as="c" hint-placeholder-count="2">
               <div style="{{ c.blockStyle }}">
                 <span style="{{ c.labelStyle }}">{{ c.name }}</span>
@@ -800,6 +805,8 @@ class Component extends DCLogic {
       onFiles: this.onFiles,
       hasFrames: s.frames.length > 0,
       noFrames: s.frames.length === 0,
+      uploadColStyle: `padding-top:22px;width:100%;${s.isDesktop ? 'max-width:440px' : ''}`,
+      slotGridStyle: 'margin-top:2px;display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--color-divider);border-bottom:2px solid var(--color-text)',
       slotCount: `${s.frames.length} / 9`,
       uploadTips: [
         { k: 'Do', v: 'Whole outfit in frame, shoulders to knees' },
@@ -815,8 +822,8 @@ class Component extends DCLogic {
           url: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
           imgStyle: 'display:none', sweepStyle: 'display:none', flagStyle: 'display:none', flag: '',
           plus: i === s.frames.length ? '+' : '',
-          plusStyle: `font-family:var(--font-heading);font-weight:700;font-size:${i === s.frames.length ? 22 : 0}px;line-height:1;color:var(--color-neutral-700)`,
-          emptyStyle: `position:absolute;inset:0;width:100%;border:none;background:${i === s.frames.length ? 'var(--color-neutral-200)' : 'transparent'};display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;padding:8px;cursor:pointer`,
+          plusStyle: `align-self:center;font-family:var(--font-heading);font-weight:700;font-size:${i === s.frames.length ? 26 : 0}px;line-height:1;color:var(--color-text)`,
+          emptyStyle: `position:absolute;inset:0;width:100%;border:${i === s.frames.length ? '2px solid var(--color-text)' : 'none'};background:${i === s.frames.length ? 'var(--color-neutral-300)' : 'var(--color-neutral-200)'};display:flex;flex-direction:column;justify-content:space-between;align-items:stretch;padding:8px;cursor:pointer`,
         };
         return {
           filled: true, empty: false, n,
@@ -944,6 +951,7 @@ class Component extends DCLogic {
         dotStyle: `width:14px;height:4px;background:${s.worn[i] ? 'var(--color-text)' : d.colors[0].hex}`,
         pick: () => this.setState({ day: i }),
       })),
+      dayBlocksStyle: `display:flex;height:${s.isDesktop ? 280 : 200}px;border-top:2px solid var(--color-text);border-bottom:2px solid var(--color-text)`,
       dayHeadline: today ? (s.day === (new Date().getDay() === 0 ? 6 : new Date().getDay() - 1) ? `Today · ${today.day}` : today.day) : '',
       dayOccasion: today ? today.occasion : '',
       dayColors: today ? today.colors.map((c, i) => ({

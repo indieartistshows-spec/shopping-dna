@@ -11,7 +11,6 @@ Static site. No build step, no framework install.
 | `index.html` | The whole app — markup, screens and logic |
 | `sdna-engine.js` | Classification engine: colour science, k-means, texture, fit, palettes, animal marks |
 | `support.js` | Component runtime the page loads |
-| `_ds/` | Design system tokens and stylesheet |
 
 Models are fetched at runtime from the MediaPipe CDN, so the first read needs a connection. Photos never leave the device.
 
@@ -63,6 +62,8 @@ One responsive build. Under 900px it runs as a full-bleed app with a fixed botto
 
 ## Version log
 
+- **0.3.2** — Design tokens inlined into the page; upload column aligned on desktop. The live build no longer loads the `_ds/` folder, which was failing to resolve on the host and rendering every surface white.
+- **0.3.1** — Capped the upload grid and day blocks on desktop so phone-sized layouts stop stretching.
 - **0.3.0** — UI pass: box-sizing reset (fixed horizontal bleed on all screens), surface/ground separation on cards and list rows, press + focus states on every control, blurred scrims with scroll lock, sheets become centred modals on desktop.
 - **0.2.0** — Responsive: real web app on mobile, website on desktop. Phone bezel removed.
 - **0.1.0** — Intro, upload, read, email gate, reveal, correct, weekly plan, shop. Neutral palette, Space Grotesk over Inter, twenty animal marks.
