@@ -12,6 +12,7 @@ Static site. No build step, no framework install.
 | `sdna-engine.js` | Classification engine: colour science, k-means, texture, fit, palettes, animal marks |
 | `brands.js` | The 100 Indian labels, their segments and price bands |
 | `auth.js` | Google sign-in via Supabase Auth |
+| `quota.js` | Five reads per account per day |
 | `leads.js` | Writes the signed-in user to Supabase |
 | `support.js` | Component runtime the page loads |
 
@@ -65,6 +66,38 @@ create policy "authenticated can insert leads"
 
 If you no longer want unauthenticated writes, drop the old policy: `drop policy "anon can insert leads" on public.leads;`
 
+### 1b. Read quota table
+
+Each generation is logged so the five-a-day cap follows the account, not the browser.
+
+```sql
+create table if not exists public.reads (
+  id          bigint generated always as identity primary key,
+  created_at  timestamptz not null default now(),
+  user_id     uuid not null references auth.users (id),
+  email       text,
+  identity    text,
+  result      jsonb
+);
+
+create index if not exists reads_user_day on public.reads (user_id, created_at desc);
+
+alter table public.reads enable row level security;
+
+-- a signed-in visitor may log and read back only their own generations
+drop policy if exists "own reads insert" on public.reads;
+create policy "own reads insert"
+  on public.reads for insert to authenticated
+  with check (auth.uid() = user_id);
+
+drop policy if exists "own reads select" on public.reads;
+create policy "own reads select"
+  on public.reads for select to authenticated
+  using (auth.uid() = user_id);
+```
+
+The RLS `using` clause is what makes the cap trustworthy: one account cannot see or inflate another's count.
+
 ### 2. Google OAuth credentials
 
 1. **console.cloud.google.com** → create or pick a project.
@@ -94,6 +127,8 @@ Supabase → **Authentication → Configuration → URL Configuration**:
 
 A login that bounces back with `error=redirect_uri_mismatch` almost always means this list or the Google redirect URI in step 2.4 is missing an entry.
 
+**If sign-in returns you to the first screen instead of the card**, the redirect landed somewhere the allow-list did not cover, so Supabase sent the visitor to the Site URL. Add the exact origin you are testing with a `/**` suffix. The read itself is parked in `localStorage` for 30 minutes, so it survives the detour and resumes as soon as a session exists — but the token only arrives on an allowed URL.
+
 ### 5. Check it
 
 Open the site → sample read → **Continue with Google** → pick an account. You land back on the reveal; **Authentication → Users** lists the account and Table Editor → `leads` has the row with `user_id` filled in.
@@ -122,6 +157,12 @@ npm run deploy          # add, commit, push
 
 One responsive build. Under 900px it runs as a full-bleed app with a fixed bottom tab bar; at 900px and up it becomes a site with a top nav and a centred column. Add `?dev` to the URL for the screen-jump row.
 
+## The daily cap
+
+Five generations per account per calendar day, counted in `public.reads` and mirrored to `localStorage` so the cap still holds if the network drops. Once an account is at five, the first-screen button reads **We've already got 5 palettes to explore** and goes straight to that account's most recent card. The counter resets at local midnight.
+
+To change the limit, edit `DAILY_LIMIT` at the top of `quota.js`.
+
 ## Why reads vary
 
 Two rules keep results distinct:
@@ -132,6 +173,8 @@ Two rules keep results distinct:
 
 ## Version log
 
+- **0.8.0** — Five reads per account per day, enforced against Supabase with row-level security. At the cap the first-screen button offers the account's latest card instead of a new read.
+- **0.7.1** — Sign-in resume hardened: the in-progress read survives the OAuth round trip even when Supabase returns to the Site URL, and Google errors are shown instead of silently dropping to the first screen.
 - **0.7.0** — Name/email form replaced with Google sign-in through Supabase Auth. Leads now carry the auth user id.
 - **0.6.1** — Brands sorted costliest first; visitors can add a label the list is missing; demo reads are labelled as demos instead of claiming photos were analysed.
 - **0.6.0** — Brand picker between the reveal and the week planner: 100 Indian labels as tiles, search, segment filters, top-five cap, saved per device.

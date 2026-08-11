@@ -90,7 +90,10 @@ a:hover{color:var(--color-text)}
           </div>
 
           <div style="margin-top:26px;display:flex;flex-direction:column;gap:8px">
-            <button onClick="{{ goUpload }}" style="width:100%;border:none;background:var(--color-text);color:var(--color-neutral-100);padding:17px 18px;font:700 14px/1 var(--font-body);letter-spacing:.02em;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center" style-hover="background:var(--color-neutral-800)" style-active="background:var(--color-neutral-700)"><span>Let's read my closet</span><span style="font-size:12px;letter-spacing:.16em">→</span></button>
+            <button onClick="{{ heroAction }}" style="width:100%;border:none;background:var(--color-text);color:var(--color-neutral-100);padding:17px 18px;font:700 14px/1 var(--font-body);letter-spacing:.02em;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:14px" style-hover="background:var(--color-neutral-800)" style-active="background:var(--color-neutral-700)"><span>{{ heroLabel }}</span><span style="font-size:12px;letter-spacing:.16em">→</span></button>
+            <sc-if value="{{ quotaReached }}">
+              <p style="margin:0;font-size:12px;line-height:1.5;color:var(--color-neutral-700)">Five reads a day is the limit. The counter resets at midnight.</p>
+            </sc-if>
           </div>
           <p style="margin:18px 0 0;font-size:11.5px;line-height:1.5;color:var(--color-neutral-600)">The science of clothing simplified by walking into your own wardrobe.</p>
         </div>
@@ -610,7 +613,7 @@ class Component extends DCLogic {
     accuracy: 78, day: new Date().getDay() === 0 ? 6 : new Date().getDay() - 1,
     seed: 0, worn: {}, shareOpen: false, brands: [], brandQuery: '', brandSeg: 'All', brandNote: '',
     procIdx: 0, procPct: 0, segPct: 0, tick: 0, procDone: false,
-    gateOpen: false, gateError: '', gateBusy: false, leadStored: null, user: null, isDesktop: false, dev: false, copied: false, engineNote: '',
+    gateOpen: false, gateError: '', gateBusy: false, leadStored: null, user: null, quota: null, isDesktop: false, dev: false, copied: false, engineNote: '',
   };
 
   fileRef = React.createRef();
@@ -622,6 +625,7 @@ class Component extends DCLogic {
     this.onMq = () => this.setState({ isDesktop: this.mq.matches });
     this.mq.addEventListener('change', this.onMq);
     this.setState({ isDesktop: this.mq.matches, dev: /[?&]dev\b/.test(location.search) });
+    this.refreshQuota(null);
     this.resumeAuth();
     const s = this.props.startScreen;
     if (s && s !== 'intro') {
@@ -648,18 +652,39 @@ class Component extends DCLogic {
     this.mq?.removeEventListener('change', this.onMq);
   }
 
-  /* Pick the flow back up after Google sends the visitor home. */
+  /* Pick the flow back up after Google sends the visitor home.
+     Supabase may return them to the Site URL rather than the exact page that
+     started the login, so this never depends on where they land. */
   async resumeAuth() {
     let auth;
     try { auth = await import('./auth.js'); } catch { return; }
+
+    const err = auth.redirectError();
     const returning = auth.isReturningFromAuth();
     if (returning) auth.consumeRedirect();
-    if (!returning && !auth.storedSession()) return;
 
+    if (err) {
+      const parked = auth.takeParkedRead();
+      await this.load();
+      this.setState({
+        result: parked?.result ?? null,
+        monk: parked?.monk ?? 4,
+        brands: parked?.brands ?? [],
+        screen: parked?.result ? 'teaser' : 'intro',
+        gateOpen: Boolean(parked?.result),
+        gateBusy: false,
+        gateError: `Google sign-in failed: ${err}`,
+      });
+      return;
+    }
+
+    if (!auth.storedSession()) return;
     const user = await auth.currentUser();
     if (!user) return;
 
-    const parked = returning ? auth.takeParkedRead() : null;
+    // Resume whether or not this load carried the token in its hash — a
+    // signed-in visitor with a parked read should always reach their card.
+    const parked = auth.takeParkedRead();
     if (parked?.result) {
       await this.load();
       this.setState({
@@ -671,6 +696,7 @@ class Component extends DCLogic {
     } else {
       this.setState({ user });
     }
+    this.refreshQuota(user);
   }
 
   async load() {
@@ -712,9 +738,13 @@ class Component extends DCLogic {
   }
 
   /* ── flow ── */
-  goUpload = () => this.setState({ screen: 'upload' }, () => this.load().then(e => e.loadModels()).catch(() => {}));
+  goUpload = () => {
+    if (this.state.quota?.reached) return this.showLatest();
+    this.setState({ screen: 'upload' }, () => this.load().then(e => e.loadModels()).catch(() => {}));
+  };
 
   goDemo = async () => {
+    if (this.state.quota?.reached) return this.showLatest();
     const eng = await this.load();
     // Undefined args make demoResult walk the 80-identity rotation.
     // sampleIdentity only pins the family when a reviewer explicitly sets it.
@@ -724,6 +754,7 @@ class Component extends DCLogic {
   };
 
   analyse = async () => {
+    if (this.state.quota?.reached) return this.showLatest();
     const eng = await this.load();
     this.pending = eng.aggregate(this.state.frames);
     if (!this.pending) { this.setState({ engineNote: 'Could not read enough from those. Add a few more.' }); return; }
@@ -786,7 +817,32 @@ class Component extends DCLogic {
       stored = res.stored;
     } catch (e) {}
     this.setState({ gateBusy: false, gateOpen: false, gateError: '', screen: 'reveal', user, leadStored: stored });
+    this.recordRead(user, r);
   }
+
+  /* One generation counted against the account, then refresh the day's tally. */
+  async recordRead(user, result) {
+    try {
+      const q = await import('./quota.js');
+      await q.logRead(user, result);
+      this.setState({ quota: await q.todayStatus(user) });
+    } catch (e) {}
+  }
+
+  async refreshQuota(user) {
+    try {
+      const q = await import('./quota.js');
+      this.setState({ quota: await q.todayStatus(user) });
+    } catch (e) {}
+  }
+
+  /** Jump straight to the card they last generated. */
+  showLatest = async () => {
+    const latest = this.state.quota?.latest;
+    if (!latest) return;
+    await this.load();
+    this.setState({ result: latest, monk: latest.monk ?? this.state.monk, screen: 'reveal' });
+  };
 
   skipAuth = () => this.setState({ gateOpen: false, gateBusy: false, gateError: '', screen: 'reveal' });
   goRefine = () => this.setState({ screen: 'refine' });
@@ -993,6 +1049,11 @@ class Component extends DCLogic {
       analyseStyle: `width:100%;border:none;padding:17px 18px;font:700 14px/1 var(--font-body);text-align:left;cursor:${ready ? 'pointer' : 'not-allowed'};background:${ready ? 'var(--color-text)' : 'var(--color-neutral-300)'};color:${ready ? 'var(--color-neutral-100)' : 'var(--color-neutral-600)'}`,
       goDemo: this.goDemo,
       goUpload: this.goUpload,
+      quotaReached: Boolean(s.quota?.reached),
+      heroLabel: s.quota?.reached
+        ? "We've already got 5 palettes to explore"
+        : "Let's read my closet",
+      heroAction: s.quota?.reached ? this.showLatest : this.goUpload,
 
       /* processing */
       procPct: s.procPct,

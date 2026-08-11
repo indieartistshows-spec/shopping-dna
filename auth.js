@@ -7,17 +7,35 @@ const base = () => SUPABASE_URL.replace(/\/+$/, '').replace(/\/rest\/v1$/, '');
 const SESSION_KEY = 'sdna.session';
 const PENDING_KEY = 'sdna.pendingRead';
 
-/* The OAuth round trip leaves the page, so the read in progress is parked
-   in sessionStorage and picked back up when Google returns the user. */
+/* The OAuth round trip leaves the page — and if redirect_to is not in the
+   Supabase allow-list the visitor comes back on the Site URL instead, which
+   may be a different page. localStorage survives both cases; sessionStorage
+   does not. The parked read is kept for 30 minutes. */
 export function parkRead(payload) {
-  try { sessionStorage.setItem(PENDING_KEY, JSON.stringify(payload)); } catch {}
-}
-export function takeParkedRead() {
   try {
-    const raw = sessionStorage.getItem(PENDING_KEY);
-    sessionStorage.removeItem(PENDING_KEY);
-    return raw ? JSON.parse(raw) : null;
+    localStorage.setItem(PENDING_KEY, JSON.stringify({ ...payload, parked_at: Date.now() }));
+  } catch {}
+}
+export function takeParkedRead({ consume = true } = {}) {
+  try {
+    const raw = localStorage.getItem(PENDING_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (consume) localStorage.removeItem(PENDING_KEY);
+    if (parsed.parked_at && Date.now() - parsed.parked_at > 30 * 60_000) return null;
+    return parsed;
   } catch { return null; }
+}
+
+/** Supabase reports failures in the hash or the query string. */
+export function redirectError() {
+  const from = s => new URLSearchParams(s.startsWith('#') || s.startsWith('?') ? s.slice(1) : s);
+  for (const src of [location.hash, location.search]) {
+    const p = from(src || '');
+    const e = p.get('error_description') || p.get('error');
+    if (e) return decodeURIComponent(e.replace(/\+/g, ' '));
+  }
+  return null;
 }
 
 export function storedSession() {
@@ -49,7 +67,8 @@ export function signInWithGoogle(redirectTo = location.origin + location.pathnam
 /** Read the token Supabase puts in the URL hash after a successful login. */
 export function consumeRedirect() {
   const hash = location.hash.startsWith('#') ? location.hash.slice(1) : '';
-  if (!hash.includes('access_token')) return null;
+  const clean = () => history.replaceState(null, '', location.pathname + location.search.replace(/[?&](error|error_code|error_description)=[^&]*/g, '').replace(/^&/, '?'));
+  if (!hash.includes('access_token')) { if (redirectError()) clean(); return null; }
   const p = new URLSearchParams(hash);
   const session = {
     access_token: p.get('access_token'),
@@ -84,4 +103,5 @@ export async function currentUser(session = storedSession()) {
 
 /** Was this page load a return trip from Google? */
 export const isReturningFromAuth = () =>
-  typeof location !== 'undefined' && location.hash.includes('access_token');
+  typeof location !== 'undefined' &&
+  (location.hash.includes('access_token') || Boolean(redirectError()));
