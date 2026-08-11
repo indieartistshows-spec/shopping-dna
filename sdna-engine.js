@@ -99,10 +99,36 @@ const deltaE = (a,b) => Math.hypot(a[0]-b[0], a[1]-b[1], a[2]-b[2]);
 
 const COLOR_LAB = COLORS.map(c => { const [r,g,b] = hexToRgb(c.hex); return { ...c, lab: rgbToLab(r,g,b) }; });
 
+// Lightness is the noisiest channel in an uncalibrated photo — folds, shadow and
+// exposure all move it while hue stays put. Weight it down so chroma decides.
+const L_WEIGHT = 0.45;
 function nearestColor(lab) {
   let best = COLOR_LAB[0], bestD = Infinity;
-  for (const c of COLOR_LAB) { const d = deltaE(lab, c.lab); if (d < bestD) { bestD = d; best = c; } }
+  for (const c of COLOR_LAB) {
+    const dL = (lab[0] - c.lab[0]) * L_WEIGHT;
+    const d = Math.hypot(dL, lab[1] - c.lab[1], lab[2] - c.lab[2]);
+    if (d < bestD) { bestD = d; best = c; }
+  }
   return { ...best, distance: bestD };
+}
+
+const chroma = lab => Math.hypot(lab[1], lab[2]);
+
+/* Drop the shadow tail and specular highlights, then lift exposure so the
+   garment's own bright end sits at a reference lightness. Without this an
+   underexposed photo pushes every reading toward the dark end of the ramp. */
+function normaliseGarment(labs) {
+  if (labs.length < 40) return labs;
+  const Ls = labs.map(l => l[0]).sort((a, b) => a - b);
+  const lo = Ls[Math.floor(Ls.length * 0.18)];
+  const hi = Ls[Math.floor(Ls.length * 0.95)];
+  const kept = labs.filter(l => l[0] >= lo && l[0] <= hi);
+  const body = kept.length > 30 ? kept : labs;
+  const p90 = body.map(l => l[0]).sort((a, b) => a - b)[Math.floor(body.length * 0.9)];
+  // Only ever lift, never darken, and cap the correction so true black stays black.
+  const gain = Math.min(1.5, Math.max(1, 62 / Math.max(p90, 12)));
+  if (gain <= 1.02) return body;
+  return body.map(([L, a, b]) => [Math.min(100, L * gain), a, b]);
 }
 
 function kmeans(points, k = 4, iters = 12) {
@@ -223,12 +249,20 @@ function analyseFrame({ imageData, categoryMask, landmarks, w, h }) {
   const coverage = clothesCount/(w*h);
   if (coverage < 0.04 || garmentLab.length < 120) return { ok:false, reason:'Not enough garment visible' };
 
-  const clusters = kmeans(garmentLab.slice(0,4000), 4);
+  const prepared = normaliseGarment(garmentLab.slice(0, 4000));
+  const clusters = kmeans(prepared, 4);
+  const medChroma = clusters.length
+    ? clusters.map(c => chroma(c.lab)).sort((a, b) => a - b)[Math.floor(clusters.length / 2)] : 0;
   const familyVotes = {}; let dominant = null;
   for (const c of clusters) {
     const near = nearestColor(c.lab);
-    familyVotes[near.family] = (familyVotes[near.family]||0)+c.weight;
-    if (!dominant) dominant = { ...near, weight:c.weight, lab:c.lab };
+    const C = chroma(c.lab);
+    // A garment with real colour in it cannot be achromatic, however dark it is.
+    let fam = near.family;
+    if (fam === 'achromatic' && C > 12) fam = C > 34 ? 'vivid' : C > 20 ? 'rich' : 'muted';
+    if (fam !== 'achromatic' && C < 5) fam = 'achromatic';
+    familyVotes[fam] = (familyVotes[fam] || 0) + c.weight;
+    if (!dominant) dominant = { ...near, family: fam, weight: c.weight, lab: c.lab };
   }
   const familyRank = Object.entries(familyVotes).sort((a,b)=>b[1]-a[1]);
   const family = familyRank[0][0];
@@ -405,16 +439,39 @@ export async function readPhoto(url) {
   return analyseFrame({ imageData: ctx.getImageData(0,0,w,h), categoryMask:catAligned, landmarks:lm, w, h });
 }
 
-/* ── demo result, for walking the flow without photos ── */
-export function demoResult(family = 'achromatic', texture = 'smooth', fit = 'oversized') {
-  const pool = COLORS.filter(c => c.family === family);
+/* ── demo result, for walking the flow without photos ──
+   Rotation rule: walk all 80 identities before any repeat, so consecutive
+   visitors on the same device never see the same animal twice in a row. */
+const SEEN_KEY = 'sdna.seenIdentities';
+
+export function nextIdentity() {
+  let seen = [];
+  try { seen = JSON.parse(localStorage.getItem(SEEN_KEY) || '[]'); } catch {}
+  const all = [];
+  for (const f of FAMILIES) for (const t of TEXTURES) for (const fit of FITS) all.push([f, t, fit]);
+  let pool = all.filter(([f, t, fit]) => !seen.includes(`${f}|${t}|${fit}`));
+  if (!pool.length) { seen = []; pool = all; }          // full cycle done, start again
+  const pick = pool[Math.floor(Math.random() * pool.length)];
+  try { localStorage.setItem(SEEN_KEY, JSON.stringify([...seen, pick.join('|')].slice(-80))); } catch {}
+  return { family: pick[0], texture: pick[1], fit: pick[2] };
+}
+
+export function demoResult(family, texture, fit) {
+  if (!family || !texture || !fit) {
+    const n = nextIdentity();
+    family = family || n.family; texture = texture || n.texture; fit = fit || n.fit;
+  }
+  const all = COLORS.filter(c => c.family === family);
+  const off = Math.floor(Math.random() * Math.max(1, all.length - 5));
+  const pool = all.slice(off, off + 5);
   return {
     family, texture, fit, species: SPECIES[family][texture],
     name: `${EPITHET[fit]} ${SPECIES[family][texture]}`,
-    shares: { family:84, texture:66, fit:71 }, confidence: 79,
-    monk: 4, undertone: 'neutral',
+    shares: { family: 72 + Math.floor(Math.random() * 20), texture: 55 + Math.floor(Math.random() * 28), fit: 60 + Math.floor(Math.random() * 26) },
+    confidence: 68 + Math.floor(Math.random() * 24),
+    monk: Math.floor(Math.random() * 10), undertone: ['warm', 'cool', 'neutral'][Math.floor(Math.random() * 3)],
     palette: pool.slice(0,5), accent: pool[2]?.hex ?? '#8A8A8A',
-    readCount: 7, totalCount: 9, demo: true,
+    readCount: 6 + Math.floor(Math.random() * 4), totalCount: 9, demo: true,
   };
 }
 

@@ -93,8 +93,17 @@ npm run deploy          # add, commit, push
 
 One responsive build. Under 900px it runs as a full-bleed app with a fixed bottom tab bar; at 900px and up it becomes a site with a top nav and a centred column. Add `?dev` to the URL for the screen-jump row.
 
+## Why reads vary
+
+Two rules keep results distinct:
+
+**Real photos.** Lightness is the noisiest channel in an uncalibrated photo, so the nearest-colour match weights it at 0.45 and lets hue and chroma decide. Before clustering, the shadow tail and specular highlights are trimmed and exposure is lifted so the garment's bright end sits at a reference lightness. A chroma gate then stops a dark but coloured garment being filed as achromatic. Without these, shadowed navy and forest both resolved to Soft Black.
+
+**Sample reads.** `nextIdentity()` walks all 80 combinations before any repeat, persisted per device, so consecutive visitors never see the same animal twice running.
+
 ## Version log
 
+- **0.5.0** — Fixed the dark-colour bias: chroma-weighted matching, shadow trimming, exposure normalisation, chroma gate. Sample reads now rotate through all 80 identities.
 - **0.4.1** — Supabase credentials wired and verified end to end; repeat signups handled.
 - **0.4.0** — Shop removed. Email gate now writes to Supabase with offline queueing. Fixed desktop scrolling (the page was a nested scroll container).
 - **0.3.2** — Design tokens inlined; upload column aligned on desktop.
