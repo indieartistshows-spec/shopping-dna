@@ -197,6 +197,12 @@ To change the limit, edit `DAILY_LIMIT` at the top of `quota.js`.
 
 Instagram has no web endpoint that accepts an image, so the card goes through the operating system. `renderCard()` paints the 1080×1920 PNG, then `navigator.share({ files })` hands it to the native share sheet where Instagram appears — this works on iOS and Android. On desktop, or any browser without file sharing, the card downloads and instagram.com opens in a new tab.
 
+## Visual direction
+
+Editorial, after Rue Noire and MADNESS. Playfair Display set large for display — roman against italic, first word in burgundy `#6E1B2B` — over Inter for everything else. Space Grotesk is retained only for the wordmark and small caps labels. One accent, never red: burgundy on the ground, `#B8465C` on ink so it lifts off black. Sections butt against each other and are stitched by scrolling marquee seams and rotated gutter labels rather than whitespace. Photography is desaturated and mounted in `<image-slot>` elements. Three slots (`hero-figure`, `reveal-figure`, `week-figure`) ship with `editorial-figure.jpg` as their `src`. Dragging an image onto a slot overrides it and persists locally. The photograph is 16:9, so all three frames are set to that ratio rather than cropping it.
+
+Slots: `hero-figure` on the intro. Add more by dropping `<image-slot id="…" shape="rect">` into a sized wrapper.
+
 ## Photo acceptance
 
 Deliberately forgiving. Pose detection measures CUT but is no longer a gate — a photo with no usable pose still yields colour and cloth, which is most of the identity. When the portrait segmenter finds no clothing class (common on unusual crops) the engine samples the torso directly: from the shoulders when pose gives them, otherwise the central lower two thirds of the frame, excluding face and hair. Reads that lean on that fallback are weighted at roughly half a clean read rather than discarded, so leniency never quietly becomes inaccuracy. Only a frame with almost no usable pixels is refused.
@@ -211,6 +217,12 @@ Two rules keep results distinct:
 
 ## Version log
 
+- **0.12.5** — Headline overlaps the photograph; solid ink rather than a blend mode, which was dissolving the letters into the dark fabric.
+- **0.12.4** — Supplied editorial photograph replaces the Pexels stock across all three slots; frames set to 16:9 to match it.
+- **0.12.3** — Pexels stock photography wired into three slots (hero, reveal, week). User drops still override.
+- **0.12.2** — Display face changed from Bodoni Moda to Playfair Display at weight 500; Bodoni’s hairlines went fragile at phone sizes.
+- **0.12.1** — Marquee seams now bleed to the real column edge at both breakpoints (they overhung by 20px on desktop). Lifted burgundy moved into a `--burgundy-lift` token instead of a hex piped through a template hole.
+- **0.12.0** — Editorial direction applied: Bodoni Moda display over Inter, burgundy accent, marquee seams, rotated gutters, butted tiles, drag-and-drop photography slots.
 - **0.11.0** — Acceptance loosened much further: photos are upscaled to 640px so small images read, colour sampling adapts its stride to garment size, cut is now measured from the garment silhouette when pose is unavailable, and background is rejected from fallback samples. A 120×160 image and a garment covering 2.5% of the frame both read correctly, with cut discriminating sleek from oversized. Added Share on Instagram via the native share sheet. Domain references moved to shopdna.vercel.app.
 - **0.10.0** — Brand list reordered: labels you added first (newest first), then community additions, then the curated list from high street up to couture. Week plan now draws three separate colours per day from the merged read-plus-advised palette (nine distinct colours across a week) and states each piece as Slot / Colour / Material, with the layer named by cut and skipped outright on warmer days.
 - **0.9.2** — Fixed upload doing nothing: the file input was cleared before the async handler had copied the FileList, so every pick arrived empty.

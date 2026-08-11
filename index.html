@@ -9,10 +9,12 @@
 <x-dc>
 <helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&amp;family=Space+Grotesk:wght@400;500;600;700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
 <style>
 :root{
 --font-heading:'Space Grotesk',system-ui,sans-serif;--font-body:'Inter',system-ui,sans-serif;
+--font-display:'Playfair Display',Georgia,serif;--burgundy:#6E1B2B;--burgundy-lift:#B8465C;
 --color-bg:#f3f2f2;--color-surface:#eae9e9;--color-text:#201e1d;
 --color-divider:rgba(32,30,29,.4);
 --color-neutral-100:#f8f4f4;--color-neutral-200:#eae7e7;--color-neutral-300:#d7d3d3;
@@ -42,6 +44,7 @@ a:hover{color:var(--color-text)}
 @keyframes sdnaScanline{0%{transform:translateY(-8px)}100%{transform:translateY(232px)}}
 @keyframes sdnaTick{0%,100%{opacity:1}50%{opacity:0}}
 @keyframes sdnaCardIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes sdnaMarq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 @keyframes sdnaSettle{from{filter:blur(38px);letter-spacing:.06em}to{filter:blur(14px);letter-spacing:-.015em}}
 </style>
 </helmet>
@@ -78,8 +81,18 @@ a:hover{color:var(--color-text)}
       <!-- ══ INTRO ══ -->
       <sc-if value="{{ atIntro }}" hint-placeholder-val="{{ true }}">
         <div style="padding-top:26px;animation:sdnaRise .5s ease both">
-          <div style="font:600 10px/1 var(--font-body);letter-spacing:.2em;text-transform:uppercase;color:var(--color-neutral-700)">WE KNOW EXACTLY WHAT YOU SHOULD WEAR ON THURSDAY.</div>
-          <h1 style="{{ heroTitleStyle }}">Your closet has a secret identity.</h1>
+          <div style="font:600 10px/1 var(--font-body);letter-spacing:.2em;text-transform:uppercase;color:var(--burgundy)">WE KNOW EXACTLY WHAT YOU SHOULD WEAR ON THURSDAY.</div>
+          <div style="{{ heroWrapStyle }}">
+            <h1 style="{{ heroTitleStyle }}"><span style="color:var(--burgundy)">Your closet</span><br><i style="font-weight:500">has a secret</i><br>identity.</h1>
+            <div style="{{ heroFigStyle }}">
+              <image-slot id="hero-figure" shape="rect" fit="cover" src="./editorial-figure.jpg" placeholder="Editorial shot"></image-slot>
+            </div>
+          </div>
+          <div style="{{ seamStyle }}">
+            <div style="display:flex;gap:26px;width:200%;animation:sdnaMarq 22s linear infinite;font:600 8.5px/1 var(--font-body);letter-spacing:.24em;text-transform:uppercase;white-space:nowrap">
+              <sc-for list="{{ seam }}" as="s" hint-placeholder-count="14"><span>{{ s }}</span></sc-for>
+            </div>
+          </div>
           <div style="{{ heroStepsStyle }}">
             <sc-for list="{{ steps }}" as="s" hint-placeholder-count="4">
               <div style="background:var(--color-surface);padding:16px 14px 18px">
@@ -102,7 +115,7 @@ a:hover{color:var(--color-text)}
       <!-- ══ UPLOAD ══ -->
       <sc-if value="{{ atUpload }}" hint-placeholder-val="{{ true }}">
         <div style="{{ uploadColStyle }}">
-          <h2 style="margin:0;font-family:var(--font-heading);font-weight:700;font-size:28px;line-height:1;letter-spacing:-.02em;text-transform:uppercase">Four photos. Any four.</h2>
+          <h2 style="margin:0;font-family:var(--font-display);font-weight:500;font-size:34px;line-height:.9;letter-spacing:-.02em;text-transform:uppercase">Four photos. Any four.</h2>
           <p style="margin:10px 0 0;font-size:13.5px;line-height:1.45;color:var(--color-neutral-800)">Anything with your clothes in it. Cropped, angled, badly lit, no face — we will work with it.</p>
 
           <div style="margin-top:20px;display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--color-text);padding-bottom:8px">
@@ -224,7 +237,7 @@ a:hover{color:var(--color-text)}
             <div style="font:700 10px/1 var(--font-body);letter-spacing:.18em;text-transform:uppercase;opacity:.85">{{ confLabel }}</div>
           </div>
           <div>
-            <h2 style="margin:0;font-family:var(--font-heading);font-weight:700;font-size:26px;line-height:1;letter-spacing:-.02em;text-transform:uppercase">One of eighty, and yours is under that blur.</h2>
+            <h2 style="margin:0;font-family:var(--font-display);font-weight:500;font-size:32px;line-height:.9;letter-spacing:-.02em;text-transform:uppercase">One of eighty, and yours is under that blur.</h2>
             <p style="margin:10px 0 0;font-size:13.5px;color:var(--color-neutral-800)">{{ teaserSub }}</p>
             <button onClick="{{ unlock }}" style="margin-top:18px;width:100%;border:none;background:var(--color-text);color:var(--color-neutral-100);padding:17px 18px;font:700 14px/1 var(--font-body);text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center" style-hover="background:var(--color-text)"><span>Take the mask off</span><span style="font-size:12px">→</span></button>
           </div>
@@ -242,7 +255,9 @@ a:hover{color:var(--color-text)}
               <span>Shopping DNA</span><span>{{ indexLabel }}</span>
             </div>
             <div>
-              <div style="font-family:var(--font-heading);font-weight:700;font-size:52px;line-height:.9;letter-spacing:-.015em;text-transform:uppercase;text-wrap:balance">{{ resultName }}</div>
+              <div style="font-family:var(--font-display);font-weight:500;font-size:56px;line-height:.84;letter-spacing:-.02em;text-transform:uppercase">
+                <span style="color:var(--burgundy-lift)">{{ nameFirst }}</span><br><i style="font-weight:500">{{ nameSecond }}</i>
+              </div>
               <div style="margin-top:14px;display:flex;flex-wrap:wrap;gap:10px;font:700 10px/1 var(--font-body);letter-spacing:.2em">
                 <sc-for list="{{ traits }}" as="t" hint-placeholder-count="3"><span>{{ t }}</span></sc-for>
               </div>
@@ -259,7 +274,17 @@ a:hover{color:var(--color-text)}
             </div>
           </div>
 
-          <p style="margin:0;font-family:var(--font-heading);font-weight:700;font-size:19px;line-height:1.2;letter-spacing:-.01em">{{ resultLine }}</p>
+          <p style="margin:0;font-family:var(--font-display);font-weight:500;font-style:italic;font-size:23px;line-height:1.22;letter-spacing:-.01em">{{ resultLine }}</p>
+
+          <div style="{{ revealFigStyle }}">
+            <image-slot id="reveal-figure" shape="rect" fit="cover" src="./editorial-figure.jpg" placeholder="Editorial shot"></image-slot>
+          </div>
+
+          <div style="{{ revealSeamStyle }}">
+            <div style="display:flex;gap:24px;width:200%;animation:sdnaMarq 20s linear infinite;font:600 8.5px/1 var(--font-body);letter-spacing:.24em;text-transform:uppercase;white-space:nowrap">
+              <sc-for list="{{ traitSeam }}" as="t" hint-placeholder-count="12"><span>{{ t }}</span></sc-for>
+            </div>
+          </div>
 
           <sc-if value="{{ isDemo }}">
             <div style="background:var(--color-text);color:var(--color-neutral-100);padding:16px 16px 18px">
@@ -292,7 +317,7 @@ a:hover{color:var(--color-text)}
       <sc-if value="{{ atRefine }}" hint-placeholder-val="{{ true }}">
         <div style="padding-top:22px;display:flex;flex-direction:column;gap:24px">
           <div>
-            <h2 style="margin:0;font-family:var(--font-heading);font-weight:700;font-size:28px;line-height:1;letter-spacing:-.02em;text-transform:uppercase">Correct us</h2>
+            <h2 style="margin:0;font-family:var(--font-display);font-weight:500;font-size:34px;line-height:.9;letter-spacing:-.02em;text-transform:uppercase">Correct us</h2>
             <p style="margin:10px 0 0;font-size:13.5px;color:var(--color-neutral-800)">Every tap here changes tomorrow.</p>
           </div>
 
@@ -353,7 +378,7 @@ a:hover{color:var(--color-text)}
       <sc-if value="{{ atBrands }}" hint-placeholder-val="{{ true }}">
         <div style="padding-top:22px;display:flex;flex-direction:column;gap:16px">
           <div>
-            <h2 style="{{ brandTitleStyle }}">Who do you actually shop?</h2>
+            <h2 style="{{ brandTitleStyle }}">Who do you <i style="font-weight:500">actually</i> shop?</h2>
             <p style="margin:10px 0 0;font-size:13.5px;line-height:1.45;color:var(--color-neutral-800)">Mark up to five. Your week gets built from these first, and we stop showing you the rest.</p>
           </div>
 
@@ -433,8 +458,8 @@ a:hover{color:var(--color-text)}
           </div>
 
           <div>
-            <div style="font:700 10px/1 var(--font-body);letter-spacing:.18em;text-transform:uppercase;color:var(--color-neutral-700)">{{ dayHeadline }}</div>
-            <h2 style="margin:8px 0 0;font-family:var(--font-heading);font-weight:700;font-size:32px;line-height:.95;letter-spacing:-.01em;text-transform:uppercase">{{ dayOccasion }}</h2>
+            <div style="font:700 10px/1 var(--font-body);letter-spacing:.18em;text-transform:uppercase;color:var(--burgundy)">{{ dayHeadline }}</div>
+            <h2 style="margin:10px 0 0;font-family:var(--font-display);font-weight:500;font-size:42px;line-height:.86;letter-spacing:-.02em;text-transform:uppercase">{{ dayOccasion }}</h2>
           </div>
 
           <div style="{{ dayBlocksStyle }}">
@@ -445,7 +470,11 @@ a:hover{color:var(--color-text)}
             </sc-for>
           </div>
 
-          <div>
+          <div style="display:flex;border-top:2px solid var(--color-text)">
+            <div style="width:26px;flex:none;background:var(--burgundy);color:var(--color-neutral-100);display:flex;align-items:center;justify-content:center">
+              <span style="writing-mode:vertical-rl;transform:rotate(180deg);font:600 8px/1 var(--font-body);letter-spacing:.28em;text-transform:uppercase">Wear this</span>
+            </div>
+            <div style="flex:1;min-width:0">
             <sc-for list="{{ dayItems }}" as="i" hint-placeholder-count="3">
               <div style="{{ i.rowStyle }}">
                 <span style="font:700 10px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;width:78px;flex:none;color:var(--color-neutral-700)">{{ i.slot }}</span>
@@ -456,7 +485,8 @@ a:hover{color:var(--color-text)}
                 </span>
               </div>
             </sc-for>
-            <p style="margin:12px 0 0;font-size:13px;line-height:1.45;color:var(--color-neutral-800)">{{ dayNote }}</p>
+            <p style="margin:12px 0 0;padding-left:14px;font-family:var(--font-display);font-style:italic;font-weight:500;font-size:16px;line-height:1.35;color:var(--color-text)">{{ dayNote }}</p>
+            </div>
           </div>
 
           <div style="display:grid;grid-template-columns:1fr auto;gap:8px">
@@ -478,9 +508,13 @@ a:hover{color:var(--color-text)}
             </sc-for>
           </div>
 
-          <div style="background:var(--color-text);color:var(--color-neutral-100);padding:16px 16px 18px">
-            <div style="font:700 10px/1 var(--font-body);letter-spacing:.18em;text-transform:uppercase;opacity:.7">Monday, 07:00</div>
-            <div style="margin-top:8px;font-family:var(--font-heading);font-weight:700;font-size:17px;line-height:1.15;letter-spacing:-.01em">A fresh week of outfits lands before your alarm does.</div>
+          <div style="{{ weekFigStyle }}">
+            <image-slot id="week-figure" shape="rect" fit="cover" src="./editorial-figure.jpg" placeholder="Editorial shot"></image-slot>
+          </div>
+          <div style="position:relative;background:var(--burgundy);color:var(--color-neutral-100);padding:20px 18px 22px;overflow:hidden">
+            <div style="font:700 10px/1 var(--font-body);letter-spacing:.18em;text-transform:uppercase;opacity:.8">Monday, 07:00</div>
+            <div style="margin-top:10px;max-width:78%;font-family:var(--font-display);font-weight:500;font-size:26px;line-height:.98;letter-spacing:-.01em">A fresh week lands <i>before your alarm</i> does.</div>
+            <div style="position:absolute;right:-6px;bottom:-14px;font-family:var(--font-display);font-size:120px;line-height:1;opacity:.16;pointer-events:none">07</div>
           </div>
         </div>
       </sc-if>
@@ -495,7 +529,9 @@ a:hover{color:var(--color-text)}
                 <sc-for list="{{ markPaths }}" as="m" hint-placeholder-count="0"><path d="{{ m.d }}"></path></sc-for>
               </svg>
             </div>
-            <div style="margin-top:16px;font-family:var(--font-heading);font-weight:700;font-size:40px;line-height:.9;letter-spacing:-.01em;text-transform:uppercase">{{ resultName }}</div>
+            <div style="margin-top:16px;font-family:var(--font-display);font-weight:500;font-size:44px;line-height:.86;letter-spacing:-.02em;text-transform:uppercase">
+              <span style="color:var(--burgundy-lift)">{{ nameFirst }}</span> <i style="font-weight:500">{{ nameSecond }}</i>
+            </div>
             <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;font:700 10px/1 var(--font-body);letter-spacing:.18em">
               <sc-for list="{{ traits }}" as="t" hint-placeholder-count="3"><span>{{ t }}</span></sc-for>
             </div>
@@ -551,7 +587,7 @@ a:hover{color:var(--color-text)}
             <button onClick="{{ closeGate }}" style="border:none;background:transparent;font:700 10px/1 var(--font-body);letter-spacing:.14em;cursor:pointer;color:var(--color-neutral-700)">LATER</button>
           </div>
 
-          <h2 style="margin:16px 0 0;font-family:var(--font-heading);font-weight:700;font-size:28px;line-height:1;letter-spacing:-.01em">Sign in and it is yours.</h2>
+          <h2 style="margin:16px 0 0;font-family:var(--font-display);font-weight:500;font-size:34px;line-height:.9;letter-spacing:-.02em">Sign in and it is <i style="font-weight:500">yours</i>.</h2>
           <p style="margin:10px 0 0;font-size:13.5px;line-height:1.45;color:var(--color-neutral-800)">One tap with Google. The identity unlocks straight after, then every Monday at 7am the outfits that follow from it.</p>
 
           <button onClick="{{ submitGate }}" disabled="{{ gateBusy }}" style="{{ gateBtnStyle }}">
@@ -1057,6 +1093,9 @@ class Component extends DCLogic {
     const today = week[s.day] || null;
     const recPal = r && eng ? eng.recommendPalette(s.monk, r.undertone, r.family) : [];
 
+    // Gutter width of the main column, so full-bleed elements can cancel it.
+    const pad = s.isDesktop ? 48 : 20;
+
     const BL = this.brandLib;
     const brandResults = BL ? BL.searchBrands(s.brandQuery, s.brandSeg) : [];
 
@@ -1077,7 +1116,11 @@ class Component extends DCLogic {
       showDevNav: !!s.dev || !!this.props.showDevNav,
       headerStyle: `position:sticky;top:0;z-index:50;flex:none;display:flex;justify-content:space-between;align-items:center;gap:16px;background:var(--color-bg);border-bottom:2px solid var(--color-text);padding:${s.isDesktop ? '18px 48px' : '16px 20px'}`,
       mainStyle: `flex:1;width:100%;display:flex;flex-direction:column;margin:0 auto;${s.isDesktop ? 'max-width:760px;padding:0 48px 80px' : `padding:0 20px ${inApp ? 104 : 40}px`}`,
-      heroTitleStyle: `margin:14px 0 0;font-family:var(--font-heading);font-weight:700;font-size:${s.isDesktop ? 68 : 42}px;line-height:.95;letter-spacing:-.01em;text-transform:uppercase;text-wrap:balance`,
+      heroWrapStyle: 'position:relative;margin-top:14px',
+      heroTitleStyle: `position:relative;z-index:2;margin:0;max-width:${s.isDesktop ? '92%' : '100%'};font-family:var(--font-display);font-weight:500;font-size:${s.isDesktop ? 78 : 44}px;line-height:.86;letter-spacing:-.02em;text-transform:uppercase;pointer-events:none`,
+      heroFigStyle: `position:relative;z-index:1;margin-top:${s.isDesktop ? -58 : -32}px;width:100%;aspect-ratio:16/9;filter:grayscale(1) contrast(1.02) brightness(1.06)`,
+      seam: Array.from({ length: 14 }, (_, i) => ['EIGHTY IDENTITIES', '·', 'READ ON DEVICE', '·', 'FOUR PHOTOS', '·', 'NO UPLOAD', '·'][i % 8]),
+      seamStyle: `margin-top:0;background:var(--color-text);color:var(--color-neutral-100);overflow:hidden;padding:8px 0;margin-left:-${pad}px;margin-right:-${pad}px`,
       heroStepsStyle: `margin-top:${s.isDesktop ? 40 : 26}px;display:grid;grid-template-columns:${s.isDesktop ? 'repeat(4,1fr)' : '1fr 1fr'};gap:2px;background:var(--color-divider);border-top:2px solid var(--color-text);border-bottom:2px solid var(--color-text)`,
       barTitle: inApp ? (tab === 'today' ? 'Today' : 'Your DNA')
         : screen === 'brands' ? 'Your brands'
@@ -1232,6 +1275,15 @@ class Component extends DCLogic {
 
       /* identity */
       resultName: r ? r.name : 'Grand Panther',
+      nameFirst: r ? r.name.split(' ')[0] : 'Grand',
+      nameSecond: r ? r.name.split(' ').slice(1).join(' ') : 'Panther',
+      traitSeam: Array.from({ length: 12 }, (_, i) => {
+        const t = meta ? meta.traits : ['PRECISE', 'NOCTURNAL', 'CERTAIN'];
+        return i % 2 ? '·' : t[Math.floor(i / 2) % t.length];
+      }),
+      revealFigStyle: `width:100%;aspect-ratio:16/9;filter:grayscale(1) contrast(1.08);margin-bottom:-2px`,
+      weekFigStyle: `width:100%;aspect-ratio:16/9;filter:grayscale(1) contrast(1.08);margin-bottom:-2px`,
+      revealSeamStyle: `background:var(--burgundy);color:var(--color-neutral-100);overflow:hidden;padding:9px 0;margin-left:-${pad}px;margin-right:-${pad}px`,
       resultLine: meta ? meta.line : '',
       traits: meta ? meta.traits : [],
       confLabel: r ? `${r.confidence}% sure` : '',
@@ -1243,7 +1295,7 @@ class Component extends DCLogic {
       readLabel: r ? (r.demo ? 'Demo read' : `${r.readCount} of ${r.totalCount} photos`) : '',
       indexLabel: r && eng ? `${String(eng.ALL_ANIMALS.indexOf(r.name) + 1).padStart(2, '0')} / 80` : '',
       palette: (r ? r.palette : []).map(c => ({ chipStyle: `flex:1;height:10px;background:${c.hex}` })),
-      teaserNameStyle: 'font-family:var(--font-heading);font-weight:700;font-size:46px;line-height:.92;letter-spacing:-.015em;text-transform:uppercase;filter:blur(14px);opacity:.9;user-select:none;animation:sdnaSettle 1s cubic-bezier(.2,.8,.2,1) both',
+      teaserNameStyle: 'font-family:var(--font-display);font-weight:500;font-size:52px;line-height:.88;letter-spacing:-.02em;text-transform:uppercase;filter:blur(14px);opacity:.9;user-select:none;animation:sdnaSettle 1s cubic-bezier(.2,.8,.2,1) both',
       markPaths: r && eng && eng.animalMark ? eng.animalMark(r.species).map(d => ({ d })) : [],
       revealCardStyle: 'position:relative;overflow:hidden;background:var(--color-text);color:var(--color-neutral-100);padding:22px;min-height:420px;display:flex;flex-direction:column;justify-content:space-between;animation:sdnaRise .5s ease both',
       dnaCardStyle: 'background:var(--color-text);color:var(--color-neutral-100);padding:20px',
@@ -1280,7 +1332,7 @@ class Component extends DCLogic {
       saveRefine: this.saveRefine,
 
       /* brands */
-      brandTitleStyle: `margin:0;font-family:var(--font-heading);font-weight:700;font-size:${s.isDesktop ? 40 : 28}px;line-height:1;letter-spacing:-.01em;text-transform:uppercase`,
+      brandTitleStyle: `margin:0;font-family:var(--font-display);font-weight:500;font-size:${s.isDesktop ? 48 : 34}px;line-height:.88;letter-spacing:-.02em;text-transform:uppercase`,
       brandQuery: s.brandQuery,
       setBrandQuery: e => this.setState({ brandQuery: e.target.value }),
       segments: (BL ? (BL.customBrands().length ? [...BL.SEGMENTS, 'Yours'] : BL.SEGMENTS) : []).map(g => ({
