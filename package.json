@@ -1,0 +1,11 @@
+{
+  "name": "shopping-dna",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Shopping DNA — on-device style identity read",
+  "scripts": {
+    "dev": "npx serve . -p 3000",
+    "deploy": "git add -A && git commit -m \"update\" && git push",
+    "deploy:msg": "git add -A && git commit -m \"$MSG\" && git push"
+  }
+}
