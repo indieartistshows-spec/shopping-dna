@@ -179,7 +179,7 @@ function textureSignals(gray, mask, w, h) {
       if (mag>12){ let ang=Math.atan2(gy,gx); if (ang<0) ang+=Math.PI; bins[Math.min(7,Math.floor((ang/Math.PI)*8))]++; gradN++; }
     }
   }
-  if (L.length < 200) return null;
+  if (L.length < 60) return null;
   L.sort((a,b)=>a-b);
   const p50=L[Math.floor(L.length*0.5)], p97=L[Math.floor(L.length*0.97)];
   return {
@@ -209,7 +209,7 @@ function measureFit(mask, w, h, lm) {
   const L=lm[11], R=lm[12], LH=lm[23], RH=lm[24];
   if (!L || !R) return null;
   const shoulderPx = Math.abs(L.x-R.x)*w;
-  if (shoulderPx < 12) return null;
+  if (shoulderPx < 5) return null;
   const yShoulder = ((L.y+R.y)/2)*h;
   const yHip = (LH&&RH) ? ((LH.y+RH.y)/2)*h : yShoulder+shoulderPx*1.6;
   const yWaist = yShoulder + (yHip-yShoulder)*0.55;
@@ -232,8 +232,64 @@ function measureFit(mask, w, h, lm) {
 
 const CAT = { BACKGROUND:0, HAIR:1, BODY_SKIN:2, FACE_SKIN:3, CLOTHES:4, OTHER:5 };
 
+/* Cut, measured from the garment silhouette alone — no pose needed. Compares
+   the widest part of the garment against its median width and its overall
+   proportion, which separates a skimming line from real volume. */
+function estimateFitFromMask(mask, w, h) {
+  let x0=w, x1=-1, y0=h, y1=-1;
+  const rowW = new Int32Array(h);
+  for (let y=0;y<h;y++) {
+    let lo=-1, hi=-1;
+    for (let x=0;x<w;x++) if (mask[y*w+x]) { if (lo<0) lo=x; hi=x; }
+    if (hi>=0) {
+      rowW[y] = hi-lo+1;
+      if (y<y0) y0=y; if (y>y1) y1=y;
+      if (lo<x0) x0=lo; if (hi>x1) x1=hi;
+    }
+  }
+  const height = y1-y0+1, width = x1-x0+1;
+  if (height < 12 || width < 8) return null;
+
+  const widths = [];
+  for (let y=y0;y<=y1;y++) if (rowW[y]>0) widths.push(rowW[y]);
+  if (widths.length < 8) return null;
+  widths.sort((a,b)=>a-b);
+  const med = widths[Math.floor(widths.length*0.5)];
+  const p90 = widths[Math.floor(widths.length*0.9)];
+
+  // Fullness: how wide the garment runs relative to its length.
+  const fullness = med / height;
+  // Flare: how much the widest part exceeds the typical part.
+  const flare = p90 / Math.max(1, med);
+
+  const score = fullness * 1.9 + (flare - 1) * 0.9;
+  let label;
+  if (score < 0.62) label = 'sleek';
+  else if (score < 0.95) label = 'tailored';
+  else if (score < 1.35) label = 'relaxed';
+  else label = 'oversized';
+  const edge = Math.min(...[0.62, 0.95, 1.35].map(b => Math.abs(score - b)));
+  return { label, score, fullness, flare, confidence: Math.min(0.8, 0.3 + edge * 1.6), fromMask: true };
+}
+
 /* The region most likely to be clothing: below the shoulders when pose gives
    them to us, otherwise the central lower two thirds of the frame. */
+/* Median colour of a thin frame border — a decent proxy for the background. */
+function borderLab(px, w, h, kr, kg, kb) {
+  const Ls=[], as=[], bs=[];
+  const band = Math.max(2, Math.round(Math.min(w,h) * 0.04));
+  const push = (x,y) => {
+    const o = (y*w+x)*4;
+    const lab = rgbToLab(Math.min(255,px[o]*kr), Math.min(255,px[o+1]*kg), Math.min(255,px[o+2]*kb));
+    Ls.push(lab[0]); as.push(lab[1]); bs.push(lab[2]);
+  };
+  for (let x=0;x<w;x+=3) { for (let y=0;y<band;y+=2) push(x,y); for (let y=h-band;y<h;y+=2) push(x,y); }
+  for (let y=band;y<h-band;y+=3) { for (let x=0;x<band;x+=2) push(x,y); for (let x=w-band;x<w;x+=2) push(x,y); }
+  if (Ls.length < 20) return null;
+  const med = arr => { arr.sort((p,q)=>p-q); return arr[Math.floor(arr.length/2)]; };
+  return [med(Ls), med(as), med(bs)];
+}
+
 function torsoBox(lm, w, h) {
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
   if (lm && lm[11] && lm[12]) {
@@ -257,13 +313,26 @@ function analyseFrame({ imageData, categoryMask, landmarks, w, h }) {
   const clothes = new Uint8Array(w*h), gray = new Float32Array(w*h);
   const garmentLab = [], skinLab = [];
   let clothesCount = 0;
+
+  // First pass: how much garment is there? Then sample at a stride that gives a
+  // healthy number of colour samples whether the garment fills the frame or a
+  // corner of it.
+  for (let i=0;i<w*h;i++) if (categoryMask[i]===CAT.CLOTHES) clothesCount++;
+  const stride = Math.max(1, Math.floor(clothesCount / 3000));
+  const skinStride = Math.max(1, Math.floor((w*h) / 6000));
+
+  let ci = 0, si = 0;
   for (let i=0;i<w*h;i++) {
     const o=i*4;
-    const r=Math.min(255,px[o]*kr), g=Math.min(255,px[o+1]*kg), b=Math.min(255,px[o+2]*kb);
     gray[i]=0.299*px[o]+0.587*px[o+1]+0.114*px[o+2];
     const cat=categoryMask[i];
-    if (cat===CAT.CLOTHES) { clothes[i]=1; clothesCount++; if (i%7===0) garmentLab.push(rgbToLab(r,g,b)); }
-    else if (cat===CAT.BODY_SKIN||cat===CAT.FACE_SKIN) { if (i%11===0) skinLab.push(rgbToLab(px[o],px[o+1],px[o+2])); }
+    if (cat===CAT.CLOTHES) {
+      clothes[i]=1;
+      if (ci++ % stride === 0) garmentLab.push(rgbToLab(
+        Math.min(255,px[o]*kr), Math.min(255,px[o+1]*kg), Math.min(255,px[o+2]*kb)));
+    } else if (cat===CAT.BODY_SKIN||cat===CAT.FACE_SKIN) {
+      if (si++ % skinStride === 0) skinLab.push(rgbToLab(px[o],px[o+1],px[o+2]));
+    }
   }
   let coverage = clothesCount/(w*h);
 
@@ -276,21 +345,44 @@ function analyseFrame({ imageData, categoryMask, landmarks, w, h }) {
     const box = torsoBox(landmarks, w, h);
     garmentLab.length = 0;
     clothesCount = 0;
+    clothes.fill(0);
+    // Background colour, sampled from the frame border. Anything close to it
+    // inside the torso box is wall, not cloth — dropping it is what lets the
+    // silhouette measure a real cut rather than a rectangle.
+    const bg = borderLab(px, w, h, kr, kg, kb);
+    const boxArea = Math.max(1, (box.x1-box.x0) * (box.y1-box.y0));
+    const fbStride = Math.max(1, Math.floor(boxArea / 2500));
+    let n = 0;
     for (let y = box.y0; y < box.y1; y++) {
       for (let x = box.x0; x < box.x1; x++) {
         const i = y*w + x;
         const cat = categoryMask[i];
         if (cat === CAT.FACE_SKIN || cat === CAT.HAIR) continue;
+        const o = i*4;
+        const lab = rgbToLab(
+          Math.min(255, px[o]*kr), Math.min(255, px[o+1]*kg), Math.min(255, px[o+2]*kb));
+        if (bg && Math.hypot(lab[0]-bg[0], (lab[1]-bg[1])*1.5, (lab[2]-bg[2])*1.5) < 15) continue;
         clothes[i] = 1; clothesCount++;
-        if (i % 5 === 0) {
+        if (n++ % fbStride === 0) garmentLab.push(lab);
+      }
+    }
+    coverage = clothesCount/(w*h);
+    // If background rejection left almost nothing, take the box as-is.
+    if (garmentLab.length < 10) {
+      let m = 0;
+      for (let y = box.y0; y < box.y1; y++) for (let x = box.x0; x < box.x1; x++) {
+        const i = y*w + x;
+        if (categoryMask[i] === CAT.FACE_SKIN || categoryMask[i] === CAT.HAIR) continue;
+        clothes[i] = 1; clothesCount++;
+        if (m++ % fbStride === 0) {
           const o = i*4;
           garmentLab.push(rgbToLab(
             Math.min(255, px[o]*kr), Math.min(255, px[o+1]*kg), Math.min(255, px[o+2]*kb)));
         }
       }
+      coverage = clothesCount/(w*h);
     }
-    coverage = clothesCount/(w*h);
-    if (garmentLab.length < 24) return { ok:false, reason:'Could not find an outfit here' };
+    if (garmentLab.length < 10) return { ok:false, reason:'Could not find an outfit here' };
     fellBack = true;
   }
 
@@ -313,7 +405,9 @@ function analyseFrame({ imageData, categoryMask, landmarks, w, h }) {
   const family = familyRank[0][0];
   const familyConf = familyRank[0][1]/(familyRank.reduce((s,[,v])=>s+v,0)||1);
   const texture = classifyTexture(textureSignals(gray, clothes, w, h));
-  const fit = landmarks ? measureFit(clothes, w, h, landmarks) : null;
+  // Pose first, silhouette second — cut is reported far more often this way.
+  let fit = landmarks ? measureFit(clothes, w, h, landmarks) : null;
+  if (!fit) fit = estimateFitFromMask(clothes, w, h);
 
   let skin = null;
   if (skinLab.length > 40) {
@@ -426,7 +520,7 @@ export function displayAccent(hex) {
 
 /* ── model loading + per-photo run ── */
 const MV = '0.10.21';
-const WORK = 512;
+const WORK = 640;   // small photos are upscaled to this, giving the models more to read
 let models = null;
 
 export async function loadModels() {
@@ -463,12 +557,16 @@ export async function readPhoto(url) {
   const img = await new Promise((res, rej) => {
     const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url;
   });
-  const scale = WORK / Math.max(img.naturalWidth, img.naturalHeight);
-  const w = Math.max(64, Math.round(img.naturalWidth*scale));
-  const h = Math.max(64, Math.round(img.naturalHeight*scale));
+  // Upscale small photos as well as downscaling large ones — a 200px image
+  // carries plenty of colour, it just needs resampling before segmentation.
+  const longest = Math.max(img.naturalWidth, img.naturalHeight) || WORK;
+  const scale = WORK / longest;
+  const w = Math.max(96, Math.round(img.naturalWidth*scale));
+  const h = Math.max(96, Math.round(img.naturalHeight*scale));
   const cv = document.createElement('canvas');
   cv.width = w; cv.height = h;
   const ctx = cv.getContext('2d', { willReadFrequently:true });
+  ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(img, 0, 0, w, h);
 
   let lm = null, poseTier = 'none';

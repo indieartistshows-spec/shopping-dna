@@ -148,10 +148,10 @@ Supabase → **Authentication → Sign In / Providers → Google** → enable �
 ### 4. Allowed URLs
 
 Supabase → **Authentication → Configuration → URL Configuration**:
-- **Site URL**: your production origin, e.g. `https://shopping-dna.vercel.app`
+- **Site URL**: your production origin, e.g. `https://shopdna.vercel.app`
 - **Redirect URLs**: add every origin you test from, one per line:
   ```
-  https://shopping-dna.vercel.app/**
+  https://shopdna.vercel.app/**
   http://localhost:3000/**
   ```
 
@@ -173,7 +173,7 @@ Google account name and email, the identity they were given, its three component
 
 ```bash
 git init && git add -A && git commit -m "Shopping DNA"
-gh repo create shopping-dna --public --source=. --remote=origin --push
+gh repo create shopdna --public --source=. --remote=origin --push
 npx vercel && npx vercel --prod
 ```
 
@@ -193,6 +193,10 @@ Five generations per account per calendar day, counted in `public.reads` and mir
 
 To change the limit, edit `DAILY_LIMIT` at the top of `quota.js`.
 
+## Sharing to Instagram
+
+Instagram has no web endpoint that accepts an image, so the card goes through the operating system. `renderCard()` paints the 1080×1920 PNG, then `navigator.share({ files })` hands it to the native share sheet where Instagram appears — this works on iOS and Android. On desktop, or any browser without file sharing, the card downloads and instagram.com opens in a new tab.
+
 ## Photo acceptance
 
 Deliberately forgiving. Pose detection measures CUT but is no longer a gate — a photo with no usable pose still yields colour and cloth, which is most of the identity. When the portrait segmenter finds no clothing class (common on unusual crops) the engine samples the torso directly: from the shoulders when pose gives them, otherwise the central lower two thirds of the frame, excluding face and hair. Reads that lean on that fallback are weighted at roughly half a clean read rather than discarded, so leniency never quietly becomes inaccuracy. Only a frame with almost no usable pixels is refused.
@@ -207,6 +211,7 @@ Two rules keep results distinct:
 
 ## Version log
 
+- **0.11.0** — Acceptance loosened much further: photos are upscaled to 640px so small images read, colour sampling adapts its stride to garment size, cut is now measured from the garment silhouette when pose is unavailable, and background is rejected from fallback samples. A 120×160 image and a garment covering 2.5% of the frame both read correctly, with cut discriminating sleek from oversized. Added Share on Instagram via the native share sheet. Domain references moved to shopdna.vercel.app.
 - **0.10.0** — Brand list reordered: labels you added first (newest first), then community additions, then the curated list from high street up to couture. Week plan now draws three separate colours per day from the merged read-plus-advised palette (nine distinct colours across a week) and states each piece as Slot / Colour / Material, with the layer named by cut and skipped outright on warmer days.
 - **0.9.2** — Fixed upload doing nothing: the file input was cleared before the async handler had copied the FileList, so every pick arrived empty.
 - **0.9.1** — Photo acceptance loosened substantially: pose is advisory, a torso fallback rescues frames the segmenter can't parse, and weak reads are down-weighted rather than rejected. Multi-select upload fixed (the `multiple` attribute was never applied), files now land in the grid together and are read in parallel. Drag and drop added.
