@@ -20,8 +20,8 @@
 --color-neutral-700:#605d5d;--color-neutral-800:#444141;--color-neutral-900:#2d2b2b;
 --ink:#201e1d;--sheet:rgba(32,30,29,.62)}
 *,*::before,*::after{box-sizing:border-box}
-html,body{margin:0;max-width:100%;overflow-x:hidden;overscroll-behavior-y:none}
-body{background:var(--color-bg);font-family:var(--font-body);-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--color-bg);font-family:var(--font-body);-webkit-font-smoothing:antialiased;overflow-x:clip}
 img,svg,canvas,video{max-width:100%;display:block}
 button,input,textarea,select{font:inherit;color:inherit;max-width:100%}
 button{-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:background .15s ease,color .15s ease,border-color .15s ease,transform .08s ease}
@@ -56,7 +56,7 @@ a:hover{color:var(--color-text)}
       <div style="display:flex;align-items:center;gap:18px">
         <sc-if value="{{ showTopNav }}">
           <nav style="display:flex;gap:4px">
-            <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+            <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="2">
               <button onClick="{{ t.pick }}" style="{{ t.topStyle }}">{{ t.label }}</button>
             </sc-for>
           </nav>
@@ -387,44 +387,6 @@ a:hover{color:var(--color-text)}
         </div>
       </sc-if>
 
-      <!-- ══ SHOP ══ -->
-      <sc-if value="{{ atShop }}" hint-placeholder-val="{{ true }}">
-        <div style="padding-top:18px;display:flex;flex-direction:column;gap:16px">
-          <div>
-            <h2 style="margin:0;font-family:var(--font-heading);font-weight:700;font-size:28px;line-height:1;letter-spacing:-.02em;text-transform:uppercase">Picked for one {{ resultName }}</h2>
-            <p style="margin:8px 0 0;font-size:13px;color:var(--color-neutral-700)">Filtered against your chroma, cut and skin tone. Nothing in here will fight you.</p>
-          </div>
-
-          <div style="display:flex;gap:4px;flex-wrap:wrap">
-            <sc-for list="{{ shopFilters }}" as="f" hint-placeholder-count="4">
-              <button onClick="{{ f.pick }}" style="{{ f.style }}">{{ f.label }}</button>
-            </sc-for>
-          </div>
-
-          <div style="margin-top:2px">
-            <sc-for list="{{ recs }}" as="p" hint-placeholder-count="6">
-              <div style="display:flex;gap:14px;padding:14px;background:var(--color-surface);border:1px solid var(--color-divider);margin-bottom:-1px">
-                <div style="{{ p.swatchStyle }}"></div>
-                <div style="flex:1;min-width:0">
-                  <div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline">
-                    <span style="font:700 10px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">{{ p.brand }}</span>
-                    <span style="font:700 10px/1 var(--font-body);letter-spacing:.1em;color:var(--color-text)">{{ p.matchLabel }}</span>
-                  </div>
-                  <div style="margin-top:6px;font-size:14px;font-weight:600;line-height:1.2">{{ p.title }}</div>
-                  <div style="margin-top:3px;font-size:12.5px;color:var(--color-neutral-700)">{{ p.colorName }} · {{ p.priceLabel }}</div>
-                  <p style="margin:7px 0 0;font-size:12px;line-height:1.4;color:var(--color-neutral-700)">{{ p.why }}</p>
-                  <div style="display:flex;gap:6px;margin-top:10px">
-                    <button onClick="{{ p.save }}" style="{{ p.saveStyle }}">{{ p.saveLabel }}</button>
-                    <button style="border:1px solid var(--color-divider);background:transparent;color:var(--color-text);padding:8px 12px;font:600 11px/1 var(--font-body);cursor:pointer" style-hover="background:var(--color-neutral-200)" style-active="background:var(--color-neutral-300)">Style it</button>
-                  </div>
-                </div>
-              </div>
-            </sc-for>
-          </div>
-          <p style="margin:0;font-size:11.5px;line-height:1.5;color:var(--color-neutral-600)">Prices are made up. Real retail feeds are not wired into this prototype yet.</p>
-        </div>
-      </sc-if>
-
       <!-- ══ DNA TAB ══ -->
       <sc-if value="{{ atDna }}" hint-placeholder-val="{{ true }}">
         <div style="padding-top:18px;display:flex;flex-direction:column;gap:16px">
@@ -473,8 +435,8 @@ a:hover{color:var(--color-text)}
 
     <!-- ══ TAB BAR ══ -->
     <sc-if value="{{ showBottomTabs }}">
-      <div style="position:fixed;left:0;right:0;bottom:0;z-index:60;border-top:2px solid var(--color-text);background:var(--color-bg);display:grid;grid-template-columns:1fr 1fr 1fr;padding-bottom:env(safe-area-inset-bottom,0px)">
-        <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+      <div style="position:fixed;left:0;right:0;bottom:0;z-index:60;border-top:2px solid var(--color-text);background:var(--color-bg);display:grid;grid-template-columns:1fr 1fr;padding-bottom:env(safe-area-inset-bottom,0px)">
+        <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="2">
           <button onClick="{{ t.pick }}" style="{{ t.style }}">{{ t.label }}</button>
         </sc-for>
       </div>
@@ -501,7 +463,7 @@ a:hover{color:var(--color-text)}
             </sc-if>
           </div>
 
-          <button onClick="{{ submitGate }}" style="margin-top:10px;width:100%;border:none;background:var(--color-text);color:var(--color-neutral-100);padding:17px 18px;font:700 14px/1 var(--font-body);text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center" style-hover="background:var(--color-neutral-800)" style-active="background:var(--color-neutral-700)"><span>Unmask it</span><span style="font-size:12px">→</span></button>
+          <button onClick="{{ submitGate }}" disabled="{{ gateBusy }}" style="{{ gateBtnStyle }}"><span>{{ gateBtnLabel }}</span><span style="font-size:12px">→</span></button>
 
           <p style="margin:14px 0 0;font-size:11px;line-height:1.5;color:var(--color-neutral-600)">Four measurements and an email. No photos, no resale, one tap and you are out.</p>
         </div>
@@ -556,9 +518,9 @@ class Component extends DCLogic {
   state = {
     screen: 'intro', tab: 'today', frames: [], result: null, monk: 4,
     accuracy: 78, day: new Date().getDay() === 0 ? 6 : new Date().getDay() - 1,
-    seed: 0, shopFilter: 'All', saved: {}, worn: {}, shareOpen: false,
+    seed: 0, worn: {}, shareOpen: false,
     procIdx: 0, procPct: 0, segPct: 0, tick: 0, procDone: false,
-    gateOpen: false, gateName: '', gateEmail: '', gateError: '', isDesktop: false, dev: false, copied: false, engineNote: '',
+    gateOpen: false, gateName: '', gateEmail: '', gateError: '', gateBusy: false, leadStored: null, isDesktop: false, dev: false, copied: false, engineNote: '',
   };
 
   fileRef = React.createRef();
@@ -573,11 +535,11 @@ class Component extends DCLogic {
     if (s && s !== 'intro') {
       this.load().then(() => {
         const r = this.eng.demoResult(this.props.sampleIdentity || 'achromatic', 'smooth', 'oversized');
-        const map = { upload: 'upload', reveal: 'reveal', today: 'app', shop: 'app', dna: 'app' };
+        const map = { upload: 'upload', reveal: 'reveal', today: 'app', dna: 'app' };
         this.setState({
-          result: ['reveal', 'today', 'shop', 'dna'].includes(s) ? r : null,
+          result: ['reveal', 'today', 'dna'].includes(s) ? r : null,
           monk: r.monk, screen: map[s] || 'intro',
-          tab: s === 'shop' ? 'shop' : s === 'dna' ? 'dna' : 'today',
+          tab: s === 'dna' ? 'dna' : 'today',
         });
       });
     }
@@ -668,10 +630,30 @@ class Component extends DCLogic {
 
   unlock = () => this.setState({ gateOpen: true, gateError: '' });
   closeGate = () => this.setState({ gateOpen: false });
-  submitGate = () => {
-    const ok = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(this.state.gateEmail.trim());
-    if (!ok) { this.setState({ gateError: 'That email is not fooling anyone. It is only for the Monday send.' }); return; }
-    this.setState({ gateOpen: false, gateError: '', screen: 'reveal' });
+  submitGate = async () => {
+    if (this.state.gateBusy) return;
+    const email = this.state.gateEmail.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+      this.setState({ gateError: 'That email is not fooling anyone. It is only for the Monday send.' });
+      return;
+    }
+    this.setState({ gateBusy: true, gateError: '' });
+    const r = this.state.result;
+    let res = { ok: true, stored: 'local' };
+    try {
+      const leads = await import('./leads.js');
+      res = await leads.saveLead({
+        name: this.state.gateName,
+        email,
+        identity: r?.name, family: r?.family, texture: r?.texture, fit: r?.fit,
+        monk: this.state.monk, confidence: r?.confidence,
+        source: r?.demo ? 'sample' : 'photos',
+      });
+    } catch (err) {
+      res = { ok: false, message: String(err.message || err) };
+    }
+    // A storage failure never blocks the reveal — the lead is queued locally.
+    this.setState({ gateBusy: false, gateOpen: false, gateError: '', screen: 'reveal', leadStored: res.stored });
   };
   gateKey = e => { if (e.key === 'Enter') this.submitGate(); };
   goRefine = () => this.setState({ screen: 'refine' });
@@ -752,8 +734,6 @@ class Component extends DCLogic {
     const week = r && eng ? eng.weekPlan(r, s.seed) : [];
     const today = week[s.day] || null;
     const recPal = r && eng ? eng.recommendPalette(s.monk, r.undertone, r.family) : [];
-    const allRecs = r && eng ? eng.shopRecs(r, s.monk, 8) : [];
-    const recs = allRecs.filter(p => s.shopFilter === 'All' || p.category === s.shopFilter);
 
     const mini = hex => `width:10px;height:10px;background:${hex};display:block`;
     const onColor = hex => {
@@ -766,7 +746,7 @@ class Component extends DCLogic {
       /* nav */
       atIntro: screen === 'intro', atUpload: screen === 'upload', atProc: screen === 'proc',
       atTeaser: screen === 'teaser', atReveal: screen === 'reveal', atRefine: screen === 'refine',
-      atToday: inApp && tab === 'today', atShop: inApp && tab === 'shop', atDna: inApp && tab === 'dna',
+      atToday: inApp && tab === 'today', atDna: inApp && tab === 'dna',
       showBottomTabs: inApp && !s.isDesktop,
       showTopNav: inApp && s.isDesktop,
       showDevNav: !!s.dev || !!this.props.showDevNav,
@@ -774,7 +754,7 @@ class Component extends DCLogic {
       mainStyle: `flex:1;width:100%;display:flex;flex-direction:column;margin:0 auto;${s.isDesktop ? 'max-width:760px;padding:0 48px 80px' : `padding:0 20px ${inApp ? 104 : 40}px`}`,
       heroTitleStyle: `margin:14px 0 0;font-family:var(--font-heading);font-weight:700;font-size:${s.isDesktop ? 68 : 42}px;line-height:.95;letter-spacing:-.01em;text-transform:uppercase;text-wrap:balance`,
       heroStepsStyle: `margin-top:${s.isDesktop ? 40 : 26}px;display:grid;grid-template-columns:${s.isDesktop ? 'repeat(4,1fr)' : '1fr 1fr'};gap:2px;background:var(--color-divider);border-top:2px solid var(--color-text);border-bottom:2px solid var(--color-text)`,
-      barTitle: inApp ? (tab === 'today' ? 'Today' : tab === 'shop' ? 'Shop' : 'Your DNA')
+      barTitle: inApp ? (tab === 'today' ? 'Today' : 'Your DNA')
         : screen === 'refine' ? 'Correct us'
         : screen === 'upload' || screen === 'proc' ? 'The read'
         : screen === 'teaser' || screen === 'reveal' ? 'Your identity' : '',
@@ -789,7 +769,6 @@ class Component extends DCLogic {
         ['Reveal', () => r ? this.setState({ screen: 'reveal' }) : this.goDemo()],
         ['Correct us', () => r ? this.setState({ screen: 'refine' }) : this.goDemo()],
         ['Today', () => r ? this.setState({ screen: 'app', tab: 'today' }) : this.goDemo()],
-        ['Shop', () => r ? this.setState({ screen: 'app', tab: 'shop' }) : this.goDemo()],
       ].map(([label, go]) => ({ label, go })),
 
       steps: [
@@ -971,21 +950,8 @@ class Component extends DCLogic {
         pick: () => this.setState({ day: d.i }),
       })),
 
-      /* shop */
-      shopFilters: ['All', 'Top', 'Bottom', 'Layer'].map(f => ({
-        label: f, style: CHIP(s.shopFilter === f), pick: () => this.setState({ shopFilter: f }),
-      })),
-      recs: recs.map(p => ({
-        title: p.title, brand: p.brand, why: p.why, colorName: p.color.name,
-        priceLabel: `£${p.price}`, matchLabel: `${p.match}% match`,
-        swatchStyle: `width:76px;height:96px;flex:none;background:${p.color.hex};${p.color.hex.toUpperCase() === '#FFFFFF' ? 'box-shadow:inset 0 0 0 1px var(--color-neutral-400)' : ''}`,
-        saveLabel: s.saved[p.id] ? 'Saved ✓' : 'Save',
-        saveStyle: `border:none;background:${s.saved[p.id] ? 'var(--color-neutral-600)' : 'var(--color-text)'};color:var(--color-neutral-100);padding:9px 13px;font:700 11px/1 var(--font-body);cursor:pointer`,
-        save: () => this.setState(st => ({ saved: { ...st.saved, [p.id]: !st.saved[p.id] } })),
-      })),
-
       /* tabs */
-      tabs: [['today', 'Today'], ['shop', 'Shop'], ['dna', 'Your DNA']].map(([k, label]) => ({
+      tabs: [['today', 'Today'], ['dna', 'Your DNA']].map(([k, label]) => ({
         label,
         topStyle: `border:none;background:${tab === k ? 'var(--color-text)' : 'transparent'};color:${tab === k ? 'var(--color-neutral-100)' : 'var(--color-neutral-700)'};padding:10px 14px;font:700 10.5px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;cursor:pointer`,
         style: `border:none;background:${tab === k ? 'var(--color-text)' : 'transparent'};color:${tab === k ? 'var(--color-neutral-100)' : 'var(--color-neutral-700)'};padding:16px 0 18px;font:700 10.5px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;cursor:pointer`,
@@ -1007,6 +973,9 @@ class Component extends DCLogic {
       setGateName: e => this.setState({ gateName: e.target.value }),
       setGateEmail: e => this.setState({ gateEmail: e.target.value, gateError: '' }),
       gateEmailStyle: `width:100%;border:2px solid ${s.gateError ? 'var(--color-text)' : 'var(--color-neutral-400)'};background:var(--color-neutral-100);padding:14px;font:400 14px/1 var(--font-body);color:var(--color-text)`,
+      gateBusy: s.gateBusy,
+      gateBtnLabel: s.gateBusy ? 'Saving…' : 'Unmask it',
+      gateBtnStyle: `margin-top:10px;width:100%;border:none;background:${s.gateBusy ? 'var(--color-neutral-600)' : 'var(--color-text)'};color:var(--color-neutral-100);padding:17px 18px;font:700 14px/1 var(--font-body);text-align:left;display:flex;justify-content:space-between;align-items:center`,
       gateKey: this.gateKey,
       submitGate: this.submitGate,
       closeGate: this.closeGate,
