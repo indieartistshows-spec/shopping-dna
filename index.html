@@ -102,11 +102,11 @@ a:hover{color:var(--color-text)}
       <!-- ══ UPLOAD ══ -->
       <sc-if value="{{ atUpload }}" hint-placeholder-val="{{ true }}">
         <div style="{{ uploadColStyle }}">
-          <h2 style="margin:0;font-family:var(--font-heading);font-weight:700;font-size:28px;line-height:1;letter-spacing:-.02em;text-transform:uppercase">Nine photos. Any nine.</h2>
+          <h2 style="margin:0;font-family:var(--font-heading);font-weight:700;font-size:28px;line-height:1;letter-spacing:-.02em;text-transform:uppercase">Four photos. Any four.</h2>
           <p style="margin:10px 0 0;font-size:13.5px;line-height:1.45;color:var(--color-neutral-800)">Full or three quarter shots with the outfit showing. Faces optional. We are not here for your face.</p>
 
           <div style="margin-top:20px;display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--color-text);padding-bottom:8px">
-            <span style="font:700 10px/1 var(--font-body);letter-spacing:.18em;text-transform:uppercase">The nine</span>
+            <span style="font:700 10px/1 var(--font-body);letter-spacing:.18em;text-transform:uppercase">The four</span>
             <span style="font-family:var(--font-heading);font-weight:700;font-size:15px;letter-spacing:-.01em">{{ slotCount }}</span>
           </div>
 
@@ -254,7 +254,7 @@ a:hover{color:var(--color-text)}
             <div style="background:var(--color-text);color:var(--color-neutral-100);padding:16px 16px 18px">
               <div style="font:700 10px/1 var(--font-body);letter-spacing:.18em;text-transform:uppercase;opacity:.7">Demo analysis</div>
               <div style="margin-top:8px;font-family:var(--font-heading);font-weight:700;font-size:17px;line-height:1.15;letter-spacing:-.01em">This one is on the house. We have not seen a single photo of you.</div>
-              <p style="margin:8px 0 0;font-size:12.5px;line-height:1.45;opacity:.85">Nine photos and the read becomes yours — your colours, your cloth, your cut.</p>
+              <p style="margin:8px 0 0;font-size:12.5px;line-height:1.45;opacity:.85">Four photos and the read becomes yours — your colours, your cloth, your cut.</p>
               <button onClick="{{ goUpload }}" style="margin-top:14px;width:100%;border:2px solid var(--color-neutral-100);background:transparent;color:var(--color-neutral-100);padding:13px 16px;font:700 12.5px/1 var(--font-body);text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center" style-hover="background:var(--color-neutral-100);color:var(--color-text)"><span>Try it with my photos</span><span style="font-size:12px">→</span></button>
             </div>
           </sc-if>
@@ -720,7 +720,7 @@ class Component extends DCLogic {
   onFiles = async e => {
     const eng = await this.load();
     const files = [...e.target.files].filter(f => f.type.startsWith('image/') || /heic|heif/i.test(f.name));
-    const room = 9 - this.state.frames.length;
+    const room = 4 - this.state.frames.length;
     for (const file of files.slice(0, room)) {
       const blob = await eng.decodeHeic(file);
       const frame = { id: Math.random().toString(36).slice(2), url: URL.createObjectURL(blob), status: 'busy', analysis: null, reason: null };
@@ -933,7 +933,7 @@ class Component extends DCLogic {
     const bad = s.frames.filter(f => f.status === 'bad');
     const reasons = Object.entries(bad.reduce((m, f) => (m[f.reason] = (m[f.reason] || 0) + 1, m), {}))
       .map(([k, n]) => `${n} ${n > 1 ? 'photos' : 'photo'}: ${k.toLowerCase()}`);
-    const ready = good >= 5 && !busy;
+    const ready = good >= 3 && !busy;
 
     const week = r && eng ? eng.weekPlan(r, s.seed) : [];
     const today = week[s.day] || null;
@@ -981,7 +981,7 @@ class Component extends DCLogic {
       ].map(([label, go]) => ({ label, go })),
 
       steps: [
-        { n: '01', t: 'Nine photos, straight off the camera roll' },
+        { n: '01', t: 'Four photos, straight off the camera roll' },
         { n: '02', t: 'We read colour, cloth, cut and tone, right here' },
         { n: '03', t: 'You get one of eighty identities, plus a card to post' },
         { n: '04', t: 'Then a combination waiting for you every morning' },
@@ -993,16 +993,16 @@ class Component extends DCLogic {
       onFiles: this.onFiles,
       hasFrames: s.frames.length > 0,
       noFrames: s.frames.length === 0,
-      uploadColStyle: `padding-top:22px;width:100%;${s.isDesktop ? 'max-width:440px' : ''}`,
-      slotGridStyle: 'margin-top:2px;display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--color-divider);border-bottom:2px solid var(--color-text)',
-      slotCount: `${s.frames.length} / 9`,
+      uploadColStyle: `padding-top:22px;width:100%;${s.isDesktop ? 'max-width:400px' : ''}`,
+      slotGridStyle: 'margin-top:2px;display:grid;grid-template-columns:repeat(2,1fr);gap:2px;background:var(--color-divider);border-bottom:2px solid var(--color-text)',
+      slotCount: `${s.frames.length} / 4`,
       uploadTips: [
         { k: 'Do', v: 'Whole outfit in frame, shoulders to knees' },
         { k: 'Do', v: 'Mirror shots, holiday pics, anything real' },
         { k: 'Skip', v: 'Head and shoulders only' },
         { k: 'Skip', v: 'Group shots where you are a speck' },
       ],
-      slots: Array.from({ length: 9 }, (_, i) => {
+      slots: Array.from({ length: 4 }, (_, i) => {
         const f = s.frames[i];
         const n = String(i + 1).padStart(2, '0');
         if (!f) return {
@@ -1044,10 +1044,10 @@ class Component extends DCLogic {
         remove: () => this.setState(st => ({ frames: st.frames.filter(x => x.id !== f.id) })),
       })),
       meterCount: `${good} / ${s.frames.length} usable`,
-      meterBarStyle: `position:absolute;left:0;top:0;bottom:0;background:var(--color-text);width:${Math.min(100, (good / 9) * 100)}%;transition:width .4s ease`,
-      meterNote: s.engineNote || (good >= 5
-        ? (reasons.length ? reasons.join(' · ') + '. Enough to read you.' : 'Good set. More photos sharpen it.')
-        : (reasons.length ? reasons.join(' · ') : 'Five usable photos is the floor.')),
+      meterBarStyle: `position:absolute;left:0;top:0;bottom:0;background:var(--color-text);width:${Math.min(100, (good / 4) * 100)}%;transition:width .4s ease`,
+      meterNote: s.engineNote || (good >= 3
+        ? (reasons.length ? reasons.join(' · ') + '. Enough to read you.' : 'Good set. A fourth sharpens it.')
+        : (reasons.length ? reasons.join(' · ') : 'Three usable photos is the floor.')),
       notReady: !ready,
       analyse: this.analyse,
       analyseStyle: `width:100%;border:none;padding:17px 18px;font:700 14px/1 var(--font-body);text-align:left;cursor:${ready ? 'pointer' : 'not-allowed'};background:${ready ? 'var(--color-text)' : 'var(--color-neutral-300)'};color:${ready ? 'var(--color-neutral-100)' : 'var(--color-neutral-600)'}`,
@@ -1100,7 +1100,7 @@ class Component extends DCLogic {
       readCount: r ? r.readCount : 0,
       isDemo: Boolean(r && r.demo),
       teaserSub: r && r.demo
-        ? 'A demo, drawn without a single photo of you. The real read needs nine.'
+        ? 'A demo, drawn without a single photo of you. The real read needs four.'
         : `Read from ${r ? r.readCount : 0} photos. We would bet a sandwich on it.`,
       readLabel: r ? (r.demo ? 'Demo read' : `${r.readCount} of ${r.totalCount} photos`) : '',
       indexLabel: r && eng ? `${String(eng.ALL_ANIMALS.indexOf(r.name) + 1).padStart(2, '0')} / 80` : '',

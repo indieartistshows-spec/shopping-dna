@@ -471,7 +471,7 @@ export function demoResult(family, texture, fit) {
     confidence: 68 + Math.floor(Math.random() * 24),
     monk: Math.floor(Math.random() * 10), undertone: ['warm', 'cool', 'neutral'][Math.floor(Math.random() * 3)],
     palette: pool.slice(0,5), accent: pool[2]?.hex ?? '#8A8A8A',
-    readCount: 6 + Math.floor(Math.random() * 4), totalCount: 9, demo: true,
+    readCount: 3 + Math.floor(Math.random() * 2), totalCount: 4, demo: true,
   };
 }
 

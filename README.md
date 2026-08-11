@@ -1,6 +1,6 @@
 # Shopping DNA
 
-An on-device style identity read. Nine photos in, one of eighty identities out, then a weekly outfit plan. Photos never leave the browser: MediaPipe Tasks Vision runs client-side and no image is uploaded.
+An on-device style identity read. Four photos in, one of eighty identities out, then a weekly outfit plan. Photos never leave the browser: MediaPipe Tasks Vision runs client-side and no image is uploaded.
 
 ## Stack
 
@@ -203,6 +203,7 @@ Two rules keep results distinct:
 
 ## Version log
 
+- **0.9.0** — Input is now a four-photo 2×2 grid instead of nine; usable floor drops to three.
 - **0.8.1** — Brand picker actions pinned to the bottom of the viewport on phone and desktop. Custom labels are saved to Supabase and merged into everyone's list.
 - **0.8.0** — Five reads per account per day, enforced against Supabase with row-level security. At the cap the first-screen button offers the account's latest card instead of a new read.
 - **0.7.1** — Sign-in resume hardened: the in-progress read survives the OAuth round trip even when Supabase returns to the Site URL, and Google errors are shown instead of silently dropping to the first screen.
