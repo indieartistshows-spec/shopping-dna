@@ -21,14 +21,14 @@ const writeQueue = rows => {
   try { localStorage.setItem(QUEUE_KEY, JSON.stringify(rows.slice(-50))); } catch {}
 };
 
-async function postRows(rows) {
+async function postRows(rows, accessToken = null) {
   const base = SUPABASE_URL.replace(/\/+$/, '').replace(/\/rest\/v1$/, '');
   const res = await fetch(`${base}/rest/v1/leads`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       apikey: SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      Authorization: `Bearer ${accessToken || SUPABASE_ANON_KEY}`,
       Prefer: 'return=minimal',
     },
     body: JSON.stringify(rows),
@@ -39,8 +39,9 @@ async function postRows(rows) {
 }
 
 /** Persist one lead. Never throws — returns a status the UI can show. */
-export async function saveLead(lead) {
+export async function saveLead(lead, accessToken = null) {
   const row = {
+    user_id: lead.userId || null,
     name: (lead.name || '').trim() || null,
     email: (lead.email || '').trim().toLowerCase(),
     identity: lead.identity || null,
@@ -59,8 +60,8 @@ export async function saveLead(lead) {
   }
 
   try {
-    await postRows([row]);
-    flushQueue();
+    await postRows([row], accessToken);
+    flushQueue(accessToken);
     return { ok: true, stored: 'supabase' };
   } catch (err) {
     writeQueue([...readQueue(), { ...row, queued_at: new Date().toISOString() }]);
@@ -69,11 +70,11 @@ export async function saveLead(lead) {
 }
 
 /** Retry anything captured while offline or before configuration. */
-export async function flushQueue() {
+export async function flushQueue(accessToken = null) {
   const queued = readQueue();
   if (!queued.length || !isConfigured()) return { sent: 0, pending: queued.length };
   try {
-    await postRows(queued.map(({ queued_at, ...row }) => row));
+    await postRows(queued.map(({ queued_at, ...row }) => row), accessToken);
     writeQueue([]);
     return { sent: queued.length, pending: 0 };
   } catch {

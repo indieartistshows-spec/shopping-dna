@@ -9,7 +9,7 @@
 <x-dc>
 <helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
 <style>
 :root{
 --font-heading:'Space Grotesk',system-ui,sans-serif;--font-body:'Inter',system-ui,sans-serif;
@@ -50,7 +50,7 @@ a:hover{color:var(--color-text)}
 
     <header style="{{ headerStyle }}">
       <div style="display:flex;align-items:baseline;gap:12px;min-width:0">
-        <span style="font-family:var(--font-heading);font-weight:700;font-size:15px;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap">Shopping DNA</span>
+        <span style="font-family: var(--font-heading); font-weight: 800; font-size: 20px; letter-spacing: .14em; text-transform: uppercase; white-space: nowrap">SHOP.DNA</span>
         <span style="font:600 10px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600);white-space:nowrap">{{ barTitle }}</span>
       </div>
       <div style="display:flex;align-items:center;gap:18px">
@@ -78,7 +78,7 @@ a:hover{color:var(--color-text)}
       <!-- ══ INTRO ══ -->
       <sc-if value="{{ atIntro }}" hint-placeholder-val="{{ true }}">
         <div style="padding-top:26px;animation:sdnaRise .5s ease both">
-          <div style="font:600 10px/1 var(--font-body);letter-spacing:.2em;text-transform:uppercase;color:var(--color-neutral-700)">Your photos never leave your device</div>
+          <div style="font:600 10px/1 var(--font-body);letter-spacing:.2em;text-transform:uppercase;color:var(--color-neutral-700)">WE KNOW EXACTLY WHAT YOU SHOULD WEAR ON THURSDAY.</div>
           <h1 style="{{ heroTitleStyle }}">Your closet has a secret identity.</h1>
           <div style="{{ heroStepsStyle }}">
             <sc-for list="{{ steps }}" as="s" hint-placeholder-count="4">
@@ -90,9 +90,9 @@ a:hover{color:var(--color-text)}
           </div>
 
           <div style="margin-top:26px;display:flex;flex-direction:column;gap:8px">
-            <button onClick="{{ goUpload }}" style="width:100%;border:none;background:var(--color-text);color:var(--color-neutral-100);padding:17px 18px;font:700 14px/1 var(--font-body);letter-spacing:.02em;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center" style-hover="background:var(--color-neutral-800)" style-active="background:var(--color-neutral-700)" style-active="background:var(--color-neutral-700)"><span>Alright, read my closet</span><span style="font-size:12px;letter-spacing:.16em">→</span></button>
+            <button onClick="{{ goUpload }}" style="width:100%;border:none;background:var(--color-text);color:var(--color-neutral-100);padding:17px 18px;font:700 14px/1 var(--font-body);letter-spacing:.02em;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center" style-hover="background:var(--color-neutral-800)" style-active="background:var(--color-neutral-700)"><span>Let's read my closet</span><span style="font-size:12px;letter-spacing:.16em">→</span></button>
           </div>
-          <p style="margin:18px 0 0;font-size:11.5px;line-height:1.5;color:var(--color-neutral-600)">Everything happens in your browser. Four numbers get saved: chroma, cloth, cut, tone. That is the whole file.</p>
+          <p style="margin:18px 0 0;font-size:11.5px;line-height:1.5;color:var(--color-neutral-600)">The science of clothing simplified by walking into your own wardrobe.</p>
         </div>
       </sc-if>
 
@@ -125,7 +125,7 @@ a:hover{color:var(--color-text)}
               </div>
             </sc-for>
           </div>
-          <input type="file" accept="image/*,.heic,.heif" multiple ref="{{ fileRef }}" onChange="{{ onFiles }}" style="display:none;position:absolute;width:0;height:0;opacity:0">
+          <input type="file" accept="image/*,.heic,.heif" multiple="" ref="{{ fileRef }}" onChange="{{ onFiles }}" style="display:none;position:absolute;width:0;height:0;opacity:0">
 
           <button onClick="{{ pickFiles }}" style="margin-top:10px;width:100%;border:2px solid var(--color-text);background:transparent;padding:14px 16px;cursor:pointer;text-align:left;color:var(--color-text);display:flex;justify-content:space-between;align-items:center" style-hover="background:var(--color-neutral-200)" style-active="background:var(--color-neutral-300)">
             <span style="font:700 11px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase">Grab from camera roll</span>
@@ -211,7 +211,7 @@ a:hover{color:var(--color-text)}
           </div>
           <div>
             <h2 style="margin:0;font-family:var(--font-heading);font-weight:700;font-size:26px;line-height:1;letter-spacing:-.02em;text-transform:uppercase">One of eighty, and yours is under that blur.</h2>
-            <p style="margin:10px 0 0;font-size:13.5px;color:var(--color-neutral-800)">Read from {{ readCount }} photos. We would bet a sandwich on it.</p>
+            <p style="margin:10px 0 0;font-size:13.5px;color:var(--color-neutral-800)">{{ teaserSub }}</p>
             <button onClick="{{ unlock }}" style="margin-top:18px;width:100%;border:none;background:var(--color-text);color:var(--color-neutral-100);padding:17px 18px;font:700 14px/1 var(--font-body);text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center" style-hover="background:var(--color-text)"><span>Take the mask off</span><span style="font-size:12px">→</span></button>
           </div>
         </div>
@@ -246,6 +246,15 @@ a:hover{color:var(--color-text)}
           </div>
 
           <p style="margin:0;font-family:var(--font-heading);font-weight:700;font-size:19px;line-height:1.2;letter-spacing:-.01em">{{ resultLine }}</p>
+
+          <sc-if value="{{ isDemo }}">
+            <div style="background:var(--color-text);color:var(--color-neutral-100);padding:16px 16px 18px">
+              <div style="font:700 10px/1 var(--font-body);letter-spacing:.18em;text-transform:uppercase;opacity:.7">Demo analysis</div>
+              <div style="margin-top:8px;font-family:var(--font-heading);font-weight:700;font-size:17px;line-height:1.15;letter-spacing:-.01em">This one is on the house. We have not seen a single photo of you.</div>
+              <p style="margin:8px 0 0;font-size:12.5px;line-height:1.45;opacity:.85">Nine photos and the read becomes yours — your colours, your cloth, your cut.</p>
+              <button onClick="{{ goUpload }}" style="margin-top:14px;width:100%;border:2px solid var(--color-neutral-100);background:transparent;color:var(--color-neutral-100);padding:13px 16px;font:700 12.5px/1 var(--font-body);text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center" style-hover="background:var(--color-neutral-100);color:var(--color-text)"><span>Try it with my photos</span><span style="font-size:12px">→</span></button>
+            </div>
+          </sc-if>
 
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
             <button onClick="{{ openShare }}" style="border:none;background:var(--color-text);color:var(--color-neutral-100);padding:15px 16px;font:700 13px/1 var(--font-body);text-align:left;cursor:pointer" style-hover="background:var(--color-neutral-800)" style-active="background:var(--color-neutral-700)">Put it online</button>
@@ -323,6 +332,75 @@ a:hover{color:var(--color-text)}
           </div>
 
           <button onClick="{{ saveRefine }}" style="width:100%;border:none;background:var(--color-text);color:var(--color-neutral-100);padding:17px 18px;font:700 14px/1 var(--font-body);text-align:left;cursor:pointer" style-hover="background:var(--color-neutral-800)" style-active="background:var(--color-neutral-700)">Save it and rebuild my week</button>
+        </div>
+      </sc-if>
+
+      <!-- ══ BRANDS ══ -->
+      <sc-if value="{{ atBrands }}" hint-placeholder-val="{{ true }}">
+        <div style="padding-top:22px;display:flex;flex-direction:column;gap:16px">
+          <div>
+            <h2 style="{{ brandTitleStyle }}">Who do you actually shop?</h2>
+            <p style="margin:10px 0 0;font-size:13.5px;line-height:1.45;color:var(--color-neutral-800)">Mark up to five. Your week gets built from these first, and we stop showing you the rest.</p>
+          </div>
+
+          <div style="position:sticky;top:58px;z-index:20;background:var(--color-bg);padding-bottom:10px">
+            <input type="search" placeholder="Search 100 labels, or type your own" ref="{{ searchRef }}" value="{{ brandQuery }}" onInput="{{ setBrandQuery }}" style="width:100%;border:2px solid var(--color-text);background:var(--color-neutral-100);padding:14px;font:400 14px/1 var(--font-body);color:var(--color-text)" style-focus="outline:none;background:var(--color-bg)">
+
+            <div style="display:flex;gap:4px;overflow-x:auto;padding:10px 0 0">
+              <sc-for list="{{ segments }}" as="g" hint-placeholder-count="9">
+                <button onClick="{{ g.pick }}" style="{{ g.style }}">{{ g.label }}</button>
+              </sc-for>
+            </div>
+
+            <div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--color-text);padding:10px 0 8px">
+              <span style="font:700 10px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase">{{ pickedLabel }}</span>
+              <span style="font:600 10px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">{{ resultCount }}</span>
+            </div>
+          </div>
+
+          <sc-if value="{{ hasPicks }}">
+            <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:-6px">
+              <sc-for list="{{ picked }}" as="p" hint-placeholder-count="0">
+                <button onClick="{{ p.toggle }}" style="display:flex;align-items:center;gap:8px;border:none;background:var(--color-text);color:var(--color-neutral-100);padding:9px 12px;font:600 12px/1 var(--font-body);cursor:pointer" style-hover="background:var(--color-neutral-800)">
+                  <span>{{ p.name }}</span><span style="font-size:13px;opacity:.7">×</span>
+                </button>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <div style="{{ brandGridStyle }}">
+            <sc-for list="{{ brandTiles }}" as="b" hint-placeholder-count="24">
+              <button onClick="{{ b.toggle }}" style="{{ b.style }}">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px;width:100%">
+                  <span style="{{ b.markStyle }}">{{ b.initials }}</span>
+                  <span style="{{ b.tickStyle }}">{{ b.tick }}</span>
+                </div>
+                <div style="width:100%">
+                  <div style="{{ b.nameStyle }}">{{ b.name }}</div>
+                  <div style="display:flex;justify-content:space-between;gap:6px;margin-top:5px;font:600 9.5px/1 var(--font-body);letter-spacing:.1em;text-transform:uppercase;opacity:.66">
+                    <span>{{ b.segment }}</span><span>{{ b.priceLabel }}</span>
+                  </div>
+                </div>
+              </button>
+            </sc-for>
+          </div>
+
+          <sc-if value="{{ canAddBrand }}">
+            <div style="background:var(--color-surface);border:1px solid var(--color-divider);padding:16px">
+              <div style="font-size:13.5px;font-weight:600;line-height:1.3">{{ addPrompt }}</div>
+              <p style="margin:6px 0 0;font-size:12.5px;color:var(--color-neutral-700)">Add it and we will treat it like any other label in your week.</p>
+              <button onClick="{{ addBrand }}" style="margin-top:12px;width:100%;border:none;background:var(--color-text);color:var(--color-neutral-100);padding:13px 16px;font:700 12.5px/1 var(--font-body);text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center" style-hover="background:var(--color-neutral-800)"><span>{{ addLabel }}</span><span style="font-size:13px">+</span></button>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ showAddHint }}">
+            <button onClick="{{ focusSearch }}" style="border:1px dashed var(--color-neutral-500);background:transparent;color:var(--color-neutral-700);padding:13px 16px;font:600 12.5px/1 var(--font-body);text-align:left;cursor:pointer" style-hover="border-color:var(--color-text);color:var(--color-text);background:var(--color-neutral-200)">Brand not listed? Type its name in the search box to add it.</button>
+          </sc-if>
+
+          <div style="display:grid;grid-template-columns:1fr auto;gap:8px;padding-top:4px">
+            <button onClick="{{ saveBrands }}" style="{{ brandCtaStyle }}"><span>{{ brandCtaLabel }}</span><span style="font-size:12px">→</span></button>
+            <button onClick="{{ skipBrands }}" style="border:2px solid var(--color-text);background:transparent;color:var(--color-text);padding:13px 16px;font:600 13px/1 var(--font-body);cursor:pointer" style-hover="background:var(--color-neutral-200)" style-active="background:var(--color-neutral-300)">Skip</button>
+          </div>
         </div>
       </sc-if>
 
@@ -427,6 +505,7 @@ a:hover{color:var(--color-text)}
             <button onClick="{{ openShare }}" style="border:none;background:var(--color-text);color:var(--color-neutral-100);padding:15px 16px;font:700 13px/1 var(--font-body);text-align:left;cursor:pointer" style-hover="background:var(--color-neutral-800)" style-active="background:var(--color-neutral-700)">Put it online</button>
             <button onClick="{{ goRefine }}" style="border:2px solid var(--color-text);background:transparent;color:var(--color-text);padding:13px 16px;font:600 13px/1 var(--font-body);text-align:left;cursor:pointer" style-hover="background:var(--color-neutral-200)" style-active="background:var(--color-neutral-300)">Correct us</button>
           </div>
+          <button onClick="{{ goBrands }}" style="width:100%;border:2px solid var(--color-text);background:transparent;color:var(--color-text);padding:13px 16px;font:600 13px/1 var(--font-body);text-align:left;cursor:pointer" style-hover="background:var(--color-neutral-200)" style-active="background:var(--color-neutral-300)">{{ brandsSummary }}</button>
           <button onClick="{{ restart }}" style="border:none;background:transparent;padding:6px 0;font:600 12px/1 var(--font-body);text-decoration:underline;text-underline-offset:3px;text-align:left;cursor:pointer;color:var(--color-neutral-700)">Start over, read me again</button>
         </div>
       </sc-if>
@@ -452,20 +531,31 @@ a:hover{color:var(--color-text)}
             <button onClick="{{ closeGate }}" style="border:none;background:transparent;font:700 10px/1 var(--font-body);letter-spacing:.14em;cursor:pointer;color:var(--color-neutral-700)">LATER</button>
           </div>
 
-          <h2 style="margin:16px 0 0;font-family:var(--font-heading);font-weight:700;font-size:28px;line-height:1;letter-spacing:-.01em">Where do we send the good stuff?</h2>
-          <p style="margin:10px 0 0;font-size:13.5px;line-height:1.45;color:var(--color-neutral-800)">The identity unlocks right now. Then every Monday at 7am, the outfits that follow from it.</p>
+          <h2 style="margin:16px 0 0;font-family:var(--font-heading);font-weight:700;font-size:28px;line-height:1;letter-spacing:-.01em">Sign in and it is yours.</h2>
+          <p style="margin:10px 0 0;font-size:13.5px;line-height:1.45;color:var(--color-neutral-800)">One tap with Google. The identity unlocks straight after, then every Monday at 7am the outfits that follow from it.</p>
 
-          <div style="margin-top:18px;display:flex;flex-direction:column;gap:8px">
-            <input type="text" placeholder="First name" value="{{ gateName }}" onInput="{{ setGateName }}" style="width:100%;border:2px solid var(--color-neutral-400);background:var(--color-neutral-100);padding:14px;font:400 14px/1 var(--font-body);color:var(--color-text)" style-focus="border-color:var(--color-text);outline:none">
-            <input type="email" placeholder="you@email.com" value="{{ gateEmail }}" onInput="{{ setGateEmail }}" onKeyDown="{{ gateKey }}" style="{{ gateEmailStyle }}" style-focus="border-color:var(--color-text);outline:none">
-            <sc-if value="{{ gateError }}">
-              <div style="font:600 11.5px/1.4 var(--font-body);color:var(--color-neutral-800);background:var(--color-neutral-200);padding:9px 12px">{{ gateError }}</div>
-            </sc-if>
-          </div>
+          <button onClick="{{ submitGate }}" disabled="{{ gateBusy }}" style="{{ gateBtnStyle }}">
+            <span style="display:flex;align-items:center;gap:12px">
+              <svg viewBox="0 0 48 48" style="width:19px;height:19px;flex:none" aria-hidden="true">
+                <path fill="#4285F4" d="M45.1 24.5c0-1.6-.1-3.2-.4-4.7H24v8.9h11.8c-.5 2.7-2 5.1-4.4 6.6v5.5h7.1c4.1-3.8 6.6-9.4 6.6-16.3z"></path>
+                <path fill="#34A853" d="M24 46c5.9 0 10.9-2 14.5-5.3l-7.1-5.5c-2 1.3-4.5 2.1-7.4 2.1-5.7 0-10.6-3.9-12.3-9.1H4.4v5.7C8 41.3 15.4 46 24 46z"></path>
+                <path fill="#FBBC05" d="M11.7 28.2c-.4-1.3-.7-2.7-.7-4.2s.3-2.9.7-4.2v-5.7H4.4A22 22 0 0 0 2 24c0 3.6.9 6.9 2.4 9.9l7.3-5.7z"></path>
+                <path fill="#EA4335" d="M24 10.7c3.2 0 6.1 1.1 8.4 3.3l6.3-6.3C34.9 4.1 29.9 2 24 2 15.4 2 8 6.7 4.4 14.1l7.3 5.7c1.7-5.2 6.6-9.1 12.3-9.1z"></path>
+              </svg>
+              <span>{{ gateBtnLabel }}</span>
+            </span>
+            <span style="font-size:12px">→</span>
+          </button>
 
-          <button onClick="{{ submitGate }}" disabled="{{ gateBusy }}" style="{{ gateBtnStyle }}"><span>{{ gateBtnLabel }}</span><span style="font-size:12px">→</span></button>
+          <sc-if value="{{ gateError }}">
+            <div style="margin-top:10px;font:600 11.5px/1.4 var(--font-body);color:var(--color-neutral-800);background:var(--color-neutral-200);padding:10px 12px">{{ gateError }}</div>
+          </sc-if>
 
-          <p style="margin:14px 0 0;font-size:11px;line-height:1.5;color:var(--color-neutral-600)">Four measurements and an email. No photos, no resale, one tap and you are out.</p>
+          <sc-if value="{{ showAuthFallback }}">
+            <button onClick="{{ skipAuth }}" style="margin-top:8px;width:100%;border:none;background:transparent;padding:8px 0;font:600 12px/1 var(--font-body);text-decoration:underline;text-underline-offset:3px;text-align:left;cursor:pointer;color:var(--color-neutral-700)">Continue without signing in</button>
+          </sc-if>
+
+          <p style="margin:14px 0 0;font-size:11px;line-height:1.5;color:var(--color-neutral-600)">We read your name and email address from Google. Nothing else, no posting, no contacts. One tap to leave.</p>
         </div>
       </div>
     </sc-if>
@@ -498,7 +588,7 @@ a:hover{color:var(--color-text)}
     <canvas width="1080" height="1920" ref="{{ canvasRef }}" style="display:none"></canvas>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1100,&quot;height&quot;:1040},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;intro&quot;,&quot;upload&quot;,&quot;reveal&quot;,&quot;today&quot;,&quot;dna&quot;],&quot;default&quot;:&quot;intro&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototype&quot;},&quot;sampleIdentity&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;rotate&quot;,&quot;achromatic&quot;,&quot;neutral&quot;,&quot;muted&quot;,&quot;rich&quot;,&quot;vivid&quot;],&quot;default&quot;:&quot;rotate&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototype&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1100,&quot;height&quot;:1040},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;intro&quot;,&quot;upload&quot;,&quot;reveal&quot;,&quot;brands&quot;,&quot;today&quot;,&quot;dna&quot;],&quot;default&quot;:&quot;intro&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototype&quot;},&quot;sampleIdentity&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;rotate&quot;,&quot;achromatic&quot;,&quot;neutral&quot;,&quot;muted&quot;,&quot;rich&quot;,&quot;vivid&quot;],&quot;default&quot;:&quot;rotate&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototype&quot;}}">
 const CHIP = sel => `border:${sel ? '2px solid var(--color-text)' : '1px solid var(--color-divider)'};background:${sel ? 'var(--color-text)' : 'transparent'};color:${sel ? '#fff' : 'var(--color-text)'};padding:${sel ? '9px 13px' : '10px 14px'};font:600 12px/1 var(--font-body);cursor:pointer`;
 
 const PROC_LINES = [
@@ -518,12 +608,13 @@ class Component extends DCLogic {
   state = {
     screen: 'intro', tab: 'today', frames: [], result: null, monk: 4,
     accuracy: 78, day: new Date().getDay() === 0 ? 6 : new Date().getDay() - 1,
-    seed: 0, worn: {}, shareOpen: false,
+    seed: 0, worn: {}, shareOpen: false, brands: [], brandQuery: '', brandSeg: 'All', brandNote: '',
     procIdx: 0, procPct: 0, segPct: 0, tick: 0, procDone: false,
-    gateOpen: false, gateName: '', gateEmail: '', gateError: '', gateBusy: false, leadStored: null, isDesktop: false, dev: false, copied: false, engineNote: '',
+    gateOpen: false, gateError: '', gateBusy: false, leadStored: null, user: null, isDesktop: false, dev: false, copied: false, engineNote: '',
   };
 
   fileRef = React.createRef();
+  searchRef = React.createRef();
   canvasRef = React.createRef();
 
   componentDidMount() {
@@ -531,14 +622,15 @@ class Component extends DCLogic {
     this.onMq = () => this.setState({ isDesktop: this.mq.matches });
     this.mq.addEventListener('change', this.onMq);
     this.setState({ isDesktop: this.mq.matches, dev: /[?&]dev\b/.test(location.search) });
+    this.resumeAuth();
     const s = this.props.startScreen;
     if (s && s !== 'intro') {
       this.load().then(() => {
         const pin = this.props.sampleIdentity;
         const r = this.eng.demoResult(pin && pin !== 'rotate' ? pin : undefined);
-        const map = { upload: 'upload', reveal: 'reveal', today: 'app', dna: 'app' };
+        const map = { upload: 'upload', reveal: 'reveal', brands: 'brands', today: 'app', dna: 'app' };
         this.setState({
-          result: ['reveal', 'today', 'dna'].includes(s) ? r : null,
+          result: ['reveal', 'brands', 'today', 'dna'].includes(s) ? r : null,
           monk: r.monk, screen: map[s] || 'intro',
           tab: s === 'dna' ? 'dna' : 'today',
         });
@@ -556,8 +648,41 @@ class Component extends DCLogic {
     this.mq?.removeEventListener('change', this.onMq);
   }
 
+  /* Pick the flow back up after Google sends the visitor home. */
+  async resumeAuth() {
+    let auth;
+    try { auth = await import('./auth.js'); } catch { return; }
+    const returning = auth.isReturningFromAuth();
+    if (returning) auth.consumeRedirect();
+    if (!returning && !auth.storedSession()) return;
+
+    const user = await auth.currentUser();
+    if (!user) return;
+
+    const parked = returning ? auth.takeParkedRead() : null;
+    if (parked?.result) {
+      await this.load();
+      this.setState({
+        result: parked.result,
+        monk: parked.monk ?? 4,
+        brands: parked.brands || [],
+        user,
+      }, () => this.completeSignIn(user));
+    } else {
+      this.setState({ user });
+    }
+  }
+
   async load() {
     if (!this.eng) this.eng = await import('./sdna-engine.js');
+    if (!this.brandLib) {
+      this.brandLib = await import('./brands.js');
+      try {
+        const saved = JSON.parse(localStorage.getItem('sdna.brands') || '[]');
+        if (saved.length) this.setState({ brands: saved.slice(0, 5) });
+      } catch (e) {}
+      this.forceUpdate();
+    }
     return this.eng;
   }
 
@@ -632,33 +757,52 @@ class Component extends DCLogic {
   closeGate = () => this.setState({ gateOpen: false });
   submitGate = async () => {
     if (this.state.gateBusy) return;
-    const email = this.state.gateEmail.trim();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
-      this.setState({ gateError: 'That email is not fooling anyone. It is only for the Monday send.' });
-      return;
-    }
     this.setState({ gateBusy: true, gateError: '' });
+    try {
+      const auth = await import('./auth.js');
+      const existing = await auth.currentUser();
+      if (existing) { await this.completeSignIn(existing); return; }
+      // Park the read: the OAuth round trip leaves the page.
+      auth.parkRead({ result: this.state.result, monk: this.state.monk, brands: this.state.brands });
+      if (!auth.signInWithGoogle()) {
+        this.setState({ gateBusy: false, gateError: 'Sign-in is not configured yet. Add your Supabase keys to leads.js.' });
+      }
+    } catch (err) {
+      this.setState({ gateBusy: false, gateError: 'Could not reach Google. Try again, or continue without signing in.' });
+    }
+  };
+
+  async completeSignIn(user) {
     const r = this.state.result;
-    let res = { ok: true, stored: 'local' };
+    let stored = 'local';
     try {
       const leads = await import('./leads.js');
-      res = await leads.saveLead({
-        name: this.state.gateName,
-        email,
+      const res = await leads.saveLead({
+        userId: user.id, name: user.name, email: user.email,
         identity: r?.name, family: r?.family, texture: r?.texture, fit: r?.fit,
         monk: this.state.monk, confidence: r?.confidence,
         source: r?.demo ? 'sample' : 'photos',
-      });
-    } catch (err) {
-      res = { ok: false, message: String(err.message || err) };
-    }
-    // A storage failure never blocks the reveal — the lead is queued locally.
-    this.setState({ gateBusy: false, gateOpen: false, gateError: '', screen: 'reveal', leadStored: res.stored });
-  };
-  gateKey = e => { if (e.key === 'Enter') this.submitGate(); };
+      }, user.token);
+      stored = res.stored;
+    } catch (e) {}
+    this.setState({ gateBusy: false, gateOpen: false, gateError: '', screen: 'reveal', user, leadStored: stored });
+  }
+
+  skipAuth = () => this.setState({ gateOpen: false, gateBusy: false, gateError: '', screen: 'reveal' });
   goRefine = () => this.setState({ screen: 'refine' });
   saveRefine = () => this.setState({ screen: 'app', tab: 'today' });
-  enterApp = () => this.setState({ screen: 'app', tab: 'today' });
+  enterApp = () => this.setState({ screen: 'brands' });
+
+  toggleBrand = id => this.setState(s => {
+    const has = s.brands.includes(id);
+    if (!has && s.brands.length >= 5) return { brandNote: 'Five is the cap. Drop one first.' };
+    const brands = has ? s.brands.filter(b => b !== id) : [...s.brands, id];
+    try { localStorage.setItem('sdna.brands', JSON.stringify(brands)); } catch (e) {}
+    return { brands, brandNote: '' };
+  });
+
+  saveBrands = () => this.setState({ screen: 'app', tab: 'today' });
+  skipBrands = () => this.setState({ screen: 'app', tab: 'today' });
   restart = () => this.setState({ screen: 'intro', frames: [], result: null, worn: {}, saved: {} });
 
   /* ── refine ── */
@@ -735,6 +879,9 @@ class Component extends DCLogic {
     const today = week[s.day] || null;
     const recPal = r && eng ? eng.recommendPalette(s.monk, r.undertone, r.family) : [];
 
+    const BL = this.brandLib;
+    const brandResults = BL ? BL.searchBrands(s.brandQuery, s.brandSeg) : [];
+
     const mini = hex => `width:10px;height:10px;background:${hex};display:block`;
     const onColor = hex => {
       const n = parseInt(hex.slice(1), 16);
@@ -746,7 +893,7 @@ class Component extends DCLogic {
       /* nav */
       atIntro: screen === 'intro', atUpload: screen === 'upload', atProc: screen === 'proc',
       atTeaser: screen === 'teaser', atReveal: screen === 'reveal', atRefine: screen === 'refine',
-      atToday: inApp && tab === 'today', atDna: inApp && tab === 'dna',
+      atBrands: screen === 'brands', atToday: inApp && tab === 'today', atDna: inApp && tab === 'dna',
       showBottomTabs: inApp && !s.isDesktop,
       showTopNav: inApp && s.isDesktop,
       showDevNav: !!s.dev || !!this.props.showDevNav,
@@ -755,6 +902,7 @@ class Component extends DCLogic {
       heroTitleStyle: `margin:14px 0 0;font-family:var(--font-heading);font-weight:700;font-size:${s.isDesktop ? 68 : 42}px;line-height:.95;letter-spacing:-.01em;text-transform:uppercase;text-wrap:balance`,
       heroStepsStyle: `margin-top:${s.isDesktop ? 40 : 26}px;display:grid;grid-template-columns:${s.isDesktop ? 'repeat(4,1fr)' : '1fr 1fr'};gap:2px;background:var(--color-divider);border-top:2px solid var(--color-text);border-bottom:2px solid var(--color-text)`,
       barTitle: inApp ? (tab === 'today' ? 'Today' : 'Your DNA')
+        : screen === 'brands' ? 'Your brands'
         : screen === 'refine' ? 'Correct us'
         : screen === 'upload' || screen === 'proc' ? 'The read'
         : screen === 'teaser' || screen === 'reveal' ? 'Your identity' : '',
@@ -768,6 +916,7 @@ class Component extends DCLogic {
         ['Sample read', this.goDemo],
         ['Reveal', () => r ? this.setState({ screen: 'reveal' }) : this.goDemo()],
         ['Correct us', () => r ? this.setState({ screen: 'refine' }) : this.goDemo()],
+        ['Brands', () => r ? this.setState({ screen: 'brands' }) : this.goDemo()],
         ['Today', () => r ? this.setState({ screen: 'app', tab: 'today' }) : this.goDemo()],
       ].map(([label, go]) => ({ label, go })),
 
@@ -775,7 +924,7 @@ class Component extends DCLogic {
         { n: '01', t: 'Nine photos, straight off the camera roll' },
         { n: '02', t: 'We read colour, cloth, cut and tone, right here' },
         { n: '03', t: 'You get one of eighty identities, plus a card to post' },
-        { n: '04', t: 'Then an outfit waiting for you every morning' },
+        { n: '04', t: 'Then a combination waiting for you every morning' },
       ],
 
       /* upload */
@@ -884,7 +1033,11 @@ class Component extends DCLogic {
       traits: meta ? meta.traits : [],
       confLabel: r ? `${r.confidence}% sure` : '',
       readCount: r ? r.readCount : 0,
-      readLabel: r ? `${r.readCount} of ${r.totalCount} photos` : '',
+      isDemo: Boolean(r && r.demo),
+      teaserSub: r && r.demo
+        ? 'A demo, drawn without a single photo of you. The real read needs nine.'
+        : `Read from ${r ? r.readCount : 0} photos. We would bet a sandwich on it.`,
+      readLabel: r ? (r.demo ? 'Demo read' : `${r.readCount} of ${r.totalCount} photos`) : '',
       indexLabel: r && eng ? `${String(eng.ALL_ANIMALS.indexOf(r.name) + 1).padStart(2, '0')} / 80` : '',
       palette: (r ? r.palette : []).map(c => ({ chipStyle: `flex:1;height:10px;background:${c.hex}` })),
       teaserNameStyle: 'font-family:var(--font-heading);font-weight:700;font-size:46px;line-height:.92;letter-spacing:-.015em;text-transform:uppercase;filter:blur(14px);opacity:.9;user-select:none;animation:sdnaSettle 1s cubic-bezier(.2,.8,.2,1) both',
@@ -895,7 +1048,7 @@ class Component extends DCLogic {
         { k: 'Chroma', v: eng.FAMILY_LABEL[r.family] },
         { k: 'Cloth', v: eng.TEXTURE_LABEL[r.texture] },
         { k: 'Cut', v: `${eng.FIT_LABEL[r.fit]}, ${eng.EPITHET_NOTE[r.fit]}` },
-        { k: 'Read from', v: `${r.readCount} of ${r.totalCount} photos` },
+        { k: 'Read from', v: r.demo ? 'No photos — demo identity' : `${r.readCount} of ${r.totalCount} photos` },
       ] : [],
       readout: r ? `${r.shares.family}% ${r.family} · ${r.shares.texture}% ${r.texture} · ${r.shares.fit}% ${r.fit} — dominant: ${r.palette.slice(0, 3).map(c => c.name).join(', ')}` : '',
       unlock: this.unlock,
@@ -922,6 +1075,62 @@ class Component extends DCLogic {
         swatchStyle: `height:48px;background:${c.hex};${c.hex.toUpperCase() === '#FFFFFF' ? 'box-shadow:inset 0 0 0 1px var(--color-neutral-400)' : ''}`,
       })),
       saveRefine: this.saveRefine,
+
+      /* brands */
+      brandTitleStyle: `margin:0;font-family:var(--font-heading);font-weight:700;font-size:${s.isDesktop ? 40 : 28}px;line-height:1;letter-spacing:-.01em;text-transform:uppercase`,
+      brandQuery: s.brandQuery,
+      setBrandQuery: e => this.setState({ brandQuery: e.target.value }),
+      segments: (BL ? (BL.customBrands().length ? [...BL.SEGMENTS, 'Yours'] : BL.SEGMENTS) : []).map(g => ({
+        label: g,
+        style: `flex:none;border:${s.brandSeg === g ? '2px solid var(--color-text)' : '1px solid var(--color-divider)'};background:${s.brandSeg === g ? 'var(--color-text)' : 'transparent'};color:${s.brandSeg === g ? 'var(--color-neutral-100)' : 'var(--color-text)'};padding:${s.brandSeg === g ? '8px 12px' : '9px 13px'};font:600 11.5px/1 var(--font-body);white-space:nowrap;cursor:pointer`,
+        pick: () => this.setState({ brandSeg: g }),
+      })),
+      pickedLabel: s.brandNote || (s.brands.length ? `${s.brands.length} of 5 picked` : 'Pick up to five'),
+      resultCount: `${brandResults.length} shown`,
+      hasPicks: s.brands.length > 0,
+      picked: s.brands.map(id => {
+        const b = BL?.BRANDS.find(x => x.id === id);
+        return { name: b ? b.name : id, toggle: () => this.toggleBrand(id) };
+      }),
+      canAddBrand: Boolean(BL && s.brandQuery.trim().length > 1 &&
+        !brandResults.some(b => b.name.toLowerCase() === s.brandQuery.trim().toLowerCase())),
+      addPrompt: brandResults.length
+        ? `Not the one you meant?`
+        : `Nothing called “${s.brandQuery.trim()}” in the list.`,
+      addLabel: `Add “${s.brandQuery.trim()}”`,
+      addBrand: () => {
+        const entry = this.brandLib?.addCustomBrand(this.state.brandQuery);
+        if (!entry) return;
+        this.setState(st => {
+          const brands = st.brands.includes(entry.id) || st.brands.length >= 5
+            ? st.brands : [...st.brands, entry.id];
+          try { localStorage.setItem('sdna.brands', JSON.stringify(brands)); } catch (e) {}
+          return { brands, brandQuery: '', brandNote: st.brands.length >= 5 ? 'Added, but five is the cap — drop one to pick it.' : '' };
+        });
+      },
+      showAddHint: Boolean(BL && !s.brandQuery.trim()),
+      focusSearch: () => this.searchRef.current?.focus(),
+      searchRef: this.searchRef,
+      brandGridStyle: `display:grid;grid-template-columns:repeat(${s.isDesktop ? 4 : 2},1fr);gap:2px;background:var(--color-divider);border-top:1px solid var(--color-divider);border-bottom:1px solid var(--color-divider)`,
+      brandTiles: brandResults.map(b => {
+        const on = s.brands.includes(b.id);
+        const full = !on && s.brands.length >= 5;
+        return {
+          name: b.name, segment: b.segment, priceLabel: b.priceLabel, initials: b.initials,
+          tick: on ? '✓' : '',
+          toggle: () => this.toggleBrand(b.id),
+          style: `display:flex;flex-direction:column;justify-content:space-between;gap:20px;min-height:118px;text-align:left;border:none;padding:12px;cursor:${full ? 'not-allowed' : 'pointer'};background:${on ? 'var(--color-text)' : 'var(--color-surface)'};color:${on ? 'var(--color-neutral-100)' : 'var(--color-text)'};opacity:${full ? .45 : 1}`,
+          markStyle: `font-family:var(--font-heading);font-weight:700;font-size:19px;letter-spacing:-.01em;opacity:${on ? .9 : .38}`,
+          tickStyle: `font:700 13px/1 var(--font-body);opacity:${on ? 1 : 0}`,
+          nameStyle: 'font-size:13.5px;font-weight:600;line-height:1.2;text-wrap:pretty',
+        };
+      }),
+      brandCtaLabel: s.brands.length ? `Build my week around these ${s.brands.length}` : 'Build my week',
+      brandCtaStyle: 'border:none;background:var(--color-text);color:var(--color-neutral-100);padding:16px 18px;font:700 13.5px/1 var(--font-body);text-align:left;display:flex;justify-content:space-between;align-items:center;cursor:pointer',
+      goBrands: () => this.setState({ screen: 'brands' }),
+      brandsSummary: s.brands.length ? `Your ${s.brands.length} brands` : 'Pick your brands',
+      saveBrands: this.saveBrands,
+      skipBrands: this.skipBrands,
 
       /* today */
       week: week.map((d, i) => ({
@@ -965,18 +1174,14 @@ class Component extends DCLogic {
       sheetStyleB: `width:100%;max-width:480px;max-height:${s.isDesktop ? '90vh' : 'none'};overflow:auto;background:var(--color-bg);border:${s.isDesktop ? '2px solid var(--color-text)' : 'none'};border-top:2px solid var(--color-text);box-shadow:0 ${s.isDesktop ? '20px' : '-18px'} 44px rgba(32,30,29,.3);padding:20px 20px calc(${s.isDesktop ? '24px' : '40px'} + env(safe-area-inset-bottom,0px));animation:sdnaRise .3s ease both`,
       teaserCardStyle: `position:relative;width:100%;max-width:${s.isDesktop ? 380 : 999}px;background:var(--color-text);color:var(--color-neutral-100);padding:26px 22px;aspect-ratio:4/5;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;animation:sdnaCardIn .55s cubic-bezier(.2,.8,.2,1) both`,
 
-      /* email gate */
+      /* sign-in gate */
       gateOpen: s.gateOpen,
-      gateName: s.gateName,
-      gateEmail: s.gateEmail,
       gateError: s.gateError,
-      setGateName: e => this.setState({ gateName: e.target.value }),
-      setGateEmail: e => this.setState({ gateEmail: e.target.value, gateError: '' }),
-      gateEmailStyle: `width:100%;border:2px solid ${s.gateError ? 'var(--color-text)' : 'var(--color-neutral-400)'};background:var(--color-neutral-100);padding:14px;font:400 14px/1 var(--font-body);color:var(--color-text)`,
+      showAuthFallback: Boolean(s.gateError),
+      skipAuth: this.skipAuth,
       gateBusy: s.gateBusy,
-      gateBtnLabel: s.gateBusy ? 'Saving…' : 'Unmask it',
-      gateBtnStyle: `margin-top:10px;width:100%;border:none;background:${s.gateBusy ? 'var(--color-neutral-600)' : 'var(--color-text)'};color:var(--color-neutral-100);padding:17px 18px;font:700 14px/1 var(--font-body);text-align:left;display:flex;justify-content:space-between;align-items:center`,
-      gateKey: this.gateKey,
+      gateBtnLabel: s.gateBusy ? 'Taking you to Google…' : 'Continue with Google',
+      gateBtnStyle: `margin-top:18px;width:100%;border:none;background:${s.gateBusy ? 'var(--color-neutral-600)' : 'var(--color-text)'};color:var(--color-neutral-100);padding:16px 18px;font:700 14px/1 var(--font-body);text-align:left;display:flex;justify-content:space-between;align-items:center;gap:12px`,
       submitGate: this.submitGate,
       closeGate: this.closeGate,
 

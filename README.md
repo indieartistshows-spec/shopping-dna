@@ -10,7 +10,9 @@ Static site. No build step, no framework install.
 | --- | --- |
 | `index.html` | The whole app — markup, screens and logic. Design tokens are inlined, so it has no external stylesheet |
 | `sdna-engine.js` | Classification engine: colour science, k-means, texture, fit, palettes, animal marks |
-| `leads.js` | Email capture → Supabase (see below) |
+| `brands.js` | The 100 Indian labels, their segments and price bands |
+| `auth.js` | Google sign-in via Supabase Auth |
+| `leads.js` | Writes the signed-in user to Supabase |
 | `support.js` | Component runtime the page loads |
 
 Models are fetched at runtime from the MediaPipe CDN, so the first read needs a connection.
@@ -23,18 +25,19 @@ npx serve . -p 3000
 
 Must be served over http, not opened as a `file://` path — the engine loads as an ES module.
 
-## Collecting names and emails (Supabase)
+## Sign-in and lead capture (Supabase + Google)
 
-The email gate before the reveal writes to Supabase. Until you configure it, leads queue in the visitor's `localStorage` and are sent on their next visit once keys are present — nothing is lost.
+The gate before the reveal is a single **Continue with Google** button. Supabase Auth handles the OAuth round trip; on return the app writes the account's name and email to `public.leads`.
 
-### 1. Create the table
+### 1. Table
 
-supabase.com → new project → **SQL Editor** → run:
+SQL Editor → run:
 
 ```sql
-create table public.leads (
+create table if not exists public.leads (
   id          bigint generated always as identity primary key,
   created_at  timestamptz not null default now(),
+  user_id     uuid references auth.users (id),
   name        text,
   email       text not null,
   identity    text,
@@ -47,33 +50,59 @@ create table public.leads (
   referrer    text
 );
 
--- one row per address; a repeat signup updates nothing and errors quietly
-create unique index leads_email_key on public.leads (lower(email));
+-- if the table already exists from the earlier email version:
+alter table public.leads add column if not exists user_id uuid references auth.users (id);
+
+create unique index if not exists leads_email_key on public.leads (lower(email));
 
 alter table public.leads enable row level security;
 
--- the public site may INSERT and nothing else. It cannot read the list back.
-create policy "anon can insert leads"
-  on public.leads for insert
-  to anon
-  with check (true);
+-- signed-in visitors write their own row
+drop policy if exists "authenticated can insert leads" on public.leads;
+create policy "authenticated can insert leads"
+  on public.leads for insert to authenticated with check (true);
 ```
 
-### 2. Keys
+If you no longer want unauthenticated writes, drop the old policy: `drop policy "anon can insert leads" on public.leads;`
 
-Already configured in `leads.js` for project `bjipufazzfihggxqsxqc`. To point at a different project, replace `SUPABASE_URL` and `SUPABASE_ANON_KEY` at the top of that file.
+### 2. Google OAuth credentials
 
-Note the policy is INSERT-only, so the client sends a plain insert — never an upsert. A repeat signup trips the unique email index, returns 409, and is treated as success.
+1. **console.cloud.google.com** → create or pick a project.
+2. **APIs & Services → OAuth consent screen** → External → fill app name, support email, developer email → Save. Add the scopes `.../auth/userinfo.email` and `.../auth/userinfo.profile`. While the app is in Testing, add your own address under Test users.
+3. **APIs & Services → Credentials → Create credentials → OAuth client ID** → Web application.
+4. **Authorised redirect URI** — exactly this (Supabase shows it on the Google panel in step 3):
+   ```
+   https://bjipufazzfihggxqsxqc.supabase.co/auth/v1/callback
+   ```
+5. Copy the **Client ID** and **Client secret**.
 
-The anon key belongs in client code. RLS is what protects the data: insert-only for anonymous visitors, so no one can read your list from the browser.
+### 3. Enable the provider
 
-### 3. Read your leads
+Supabase → **Authentication → Sign In / Providers → Google** → enable → paste Client ID and Client secret → Save.
 
-**Table Editor → leads**, or export CSV from there. To pull them programmatically use the `service_role` key from a server — never in this page.
+(Older Supabase projects label this panel **Authentication → Providers**.)
+
+### 4. Allowed URLs
+
+Supabase → **Authentication → Configuration → URL Configuration**:
+- **Site URL**: your production origin, e.g. `https://shopping-dna.vercel.app`
+- **Redirect URLs**: add every origin you test from, one per line:
+  ```
+  https://shopping-dna.vercel.app/**
+  http://localhost:3000/**
+  ```
+
+A login that bounces back with `error=redirect_uri_mismatch` almost always means this list or the Google redirect URI in step 2.4 is missing an entry.
+
+### 5. Check it
+
+Open the site → sample read → **Continue with Google** → pick an account. You land back on the reveal; **Authentication → Users** lists the account and Table Editor → `leads` has the row with `user_id` filled in.
+
+Until someone signs in, Users is empty — that is normal, not a misconfiguration.
 
 ### What gets stored
 
-Name, email, the identity they were given (`Sharp Panther`), its three components, skin-tone step, confidence, whether the read came from real photos or the sample, and the referrer. No photographs, ever.
+Google account name and email, the identity they were given, its three components, skin-tone step, confidence, whether the read used real photos, and the referrer. No photographs, and no Google data beyond name and email.
 
 ## Deploy
 
@@ -103,6 +132,9 @@ Two rules keep results distinct:
 
 ## Version log
 
+- **0.7.0** — Name/email form replaced with Google sign-in through Supabase Auth. Leads now carry the auth user id.
+- **0.6.1** — Brands sorted costliest first; visitors can add a label the list is missing; demo reads are labelled as demos instead of claiming photos were analysed.
+- **0.6.0** — Brand picker between the reveal and the week planner: 100 Indian labels as tiles, search, segment filters, top-five cap, saved per device.
 - **0.5.0** — Fixed the dark-colour bias: chroma-weighted matching, shadow trimming, exposure normalisation, chroma gate. Sample reads now rotate through all 80 identities.
 - **0.4.1** — Supabase credentials wired and verified end to end; repeat signups handled.
 - **0.4.0** — Shop removed. Email gate now writes to Supabase with offline queueing. Fixed desktop scrolling (the page was a nested scroll container).
