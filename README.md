@@ -207,6 +207,7 @@ Two rules keep results distinct:
 
 ## Version log
 
+- **0.9.2** — Fixed upload doing nothing: the file input was cleared before the async handler had copied the FileList, so every pick arrived empty.
 - **0.9.1** — Photo acceptance loosened substantially: pose is advisory, a torso fallback rescues frames the segmenter can't parse, and weak reads are down-weighted rather than rejected. Multi-select upload fixed (the `multiple` attribute was never applied), files now land in the grid together and are read in parallel. Drag and drop added.
 - **0.9.0** — Input is now a four-photo 2×2 grid instead of nine; usable floor drops to three.
 - **0.8.1** — Brand picker actions pinned to the bottom of the viewport on phone and desktop. Custom labels are saved to Supabase and merged into everyone's list.

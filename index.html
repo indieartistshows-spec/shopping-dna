@@ -731,9 +731,11 @@ class Component extends DCLogic {
   /* Every picked file lands in the grid at once, then all four are read in
      parallel — no waiting for one before the next appears. */
   intake = async fileList => {
-    const eng = await this.load();
+    // Snapshot the FileList BEFORE any await: the input is cleared straight
+    // after this returns, which empties the live list.
     const files = [...fileList].filter(f => f.type.startsWith('image/') || /heic|heif/i.test(f.name));
     if (!files.length) return;
+    const eng = await this.load();
     const room = 4 - this.state.frames.length;
     const batch = files.slice(0, room);
     const skipped = files.length - batch.length;
@@ -764,7 +766,11 @@ class Component extends DCLogic {
     }));
   };
 
-  onFiles = e => { this.intake(e.target.files); e.target.value = ''; };
+  onFiles = e => {
+    const picked = [...e.target.files];   // detach before clearing
+    e.target.value = '';
+    this.intake(picked);
+  };
 
   onDrop = e => {
     e.preventDefault();
