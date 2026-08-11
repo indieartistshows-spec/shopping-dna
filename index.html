@@ -447,9 +447,13 @@ a:hover{color:var(--color-text)}
 
           <div>
             <sc-for list="{{ dayItems }}" as="i" hint-placeholder-count="3">
-              <div style="display:flex;justify-content:space-between;gap:12px;padding:12px 14px;background:var(--color-surface);border:1px solid var(--color-divider);margin-bottom:-1px">
-                <span style="font-size:13.5px;font-weight:500;text-transform:capitalize">{{ i.name }}</span>
-                <span style="font:600 10px/1.6 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">{{ i.slot }}</span>
+              <div style="{{ i.rowStyle }}">
+                <span style="font:700 10px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;width:78px;flex:none;color:var(--color-neutral-700)">{{ i.slot }}</span>
+                <span style="{{ i.swatchStyle }}"></span>
+                <span style="flex:1;min-width:0;display:flex;flex-wrap:wrap;gap:0 8px;align-items:baseline">
+                  <span style="font-size:13.5px;font-weight:600">{{ i.colour }}</span>
+                  <span style="font-size:12.5px;color:var(--color-neutral-700)">{{ i.material }}</span>
+                </span>
               </div>
             </sc-for>
             <p style="margin:12px 0 0;font-size:13px;line-height:1.45;color:var(--color-neutral-800)">{{ dayNote }}</p>
@@ -1282,10 +1286,18 @@ class Component extends DCLogic {
       dayOccasion: today ? today.occasion : '',
       dayColors: today ? today.colors.map((c, i) => ({
         name: c.name,
-        blockStyle: `flex:${i === 0 ? 1.4 : 1};background:${c.hex};position:relative;display:flex;align-items:flex-end;padding:10px`,
+        blockStyle: `flex:${[1.5, 1, 0.65][i] ?? 1};background:${c.hex};position:relative;display:flex;align-items:flex-end;padding:10px`,
         labelStyle: `font:700 10px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:${onColor(c.hex)}`,
       })) : [],
-      dayItems: today ? today.items.map((n, i) => ({ name: n, slot: ['Top', 'Bottom', 'Layer'][i] })) : [],
+      dayItems: today ? today.items.map(it => ({
+        slot: it.slot,
+        colour: it.color ? it.color.name : 'None',
+        material: it.material || 'skip the layer today',
+        swatchStyle: it.color
+          ? `width:20px;height:20px;flex:none;background:${it.color.hex}${it.color.hex.toUpperCase() === '#FFFFFF' ? ';box-shadow:inset 0 0 0 1px var(--color-neutral-400)' : ''}`
+          : 'width:20px;height:20px;flex:none;background:transparent;box-shadow:inset 0 0 0 1px var(--color-neutral-400)',
+        rowStyle: `display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--color-surface);border:1px solid var(--color-divider);margin-bottom:-1px${it.color ? '' : ';opacity:.6'}`,
+      })) : [],
       dayNote: today ? today.note : '',
       wearThis: () => this.setState(st => ({ worn: { ...st.worn, [st.day]: !st.worn[st.day] } })),
       wearLabel: s.worn[s.day] ? 'Wearing it ✓' : 'Wear this today',

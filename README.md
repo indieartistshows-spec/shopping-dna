@@ -207,6 +207,7 @@ Two rules keep results distinct:
 
 ## Version log
 
+- **0.10.0** — Brand list reordered: labels you added first (newest first), then community additions, then the curated list from high street up to couture. Week plan now draws three separate colours per day from the merged read-plus-advised palette (nine distinct colours across a week) and states each piece as Slot / Colour / Material, with the layer named by cut and skipped outright on warmer days.
 - **0.9.2** — Fixed upload doing nothing: the file input was cleared before the async handler had copied the FileList, so every pick arrived empty.
 - **0.9.1** — Photo acceptance loosened substantially: pose is advisory, a torso fallback rescues frames the segmenter can't parse, and weak reads are down-weighted rather than rejected. Multi-select upload fixed (the `multiple` attribute was never applied), files now land in the grid together and are read in parallel. Drag and drop added.
 - **0.9.0** — Input is now a four-photo 2×2 grid instead of nine; usable floor drops to three.

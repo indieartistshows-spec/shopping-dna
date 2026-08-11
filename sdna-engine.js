@@ -544,17 +544,54 @@ const PIECES = {
 const TEX_WORD = { smooth:'a clean surface', structured:'a bit of spine', soft:'something with pile', fluid:'something that moves' };
 const BRANDS = ['ARKET','COS','Uniqlo U','Studio Nicholson','& Other Stories','Massimo Dutti','Everlane','Toteme'];
 
+/* Materials that suit each cloth reading, per slot. */
+const MATERIAL = {
+  smooth: { Top:['Fine jersey','Cotton poplin','Silk','Sateen'], Bottom:['Wool crepe','Cotton twill','Sateen','Tencel'], Layer:['Leather','Bonded cotton','Wool melton'] },
+  structured: { Top:['Oxford cotton','Heavy jersey','Denim'], Bottom:['Denim','Canvas','Wool gabardine','Corduroy'], Layer:['Wool twill','Waxed canvas','Boiled wool'] },
+  soft: { Top:['Brushed cotton','Merino','Cashmere','Loopback jersey'], Bottom:['Brushed twill','Wool flannel','Jersey'], Layer:['Teddy fleece','Alpaca blend','Quilted cotton'] },
+  fluid: { Top:['Viscose','Silk crepe','Cupro','Modal'], Bottom:['Viscose twill','Silk trouser','Crepe de chine'], Layer:['Unlined viscose','Silk bomber','Crepe overshirt'] },
+};
+const LAYER_NAME = { sleek:'Jacket', tailored:'Jacket', relaxed:'Overshirt', oversized:'Overcoat' };
+
 export function weekPlan(result, seed = 0) {
-  const pal = result.palette.length ? result.palette : COLORS.filter(c => c.family === result.family).slice(0,5);
-  const pieces = PIECES[result.fit];
+  /* Draw on the whole palette rather than one or two colours: the working
+     palette (skin-tone aware) is merged with what was actually read from the
+     photos, then each slot takes a different step through it per day. */
+  const read = result.palette || [];
+  const advised = recommendPalette(result.monk, result.undertone, result.family,
+    read.slice(0, 2).map(c => c.name));
+  const seen = new Set();
+  const pal = [...read, ...advised]
+    .filter(c => c && !seen.has(c.name) && seen.add(c.name));
+  const fallback = COLORS.filter(c => c.family === result.family);
+  const P = pal.length >= 3 ? pal : [...pal, ...fallback].slice(0, 6);
+  const mats = MATERIAL[result.texture] || MATERIAL.smooth;
+  const pick = (arr, n) => arr[n % arr.length];
+  const layerLabel = LAYER_NAME[result.fit] || 'Jacket';
+
   return DAYS.map((day, i) => {
-    const c1 = pal[(i+seed) % pal.length], c2 = pal[(i+seed+2) % pal.length];
+    const t = seed * 3 + i;
+    // Three separate steps through the palette, so a day is never one colour.
+    const top = pick(P, t);
+    const bottom = pick(P, t + 2 + (i % 2));
+    const layer = pick(P, t + 4 + (i % 3));
+    const heat = 0.4 + ((i*17 + seed*7) % 60)/100;
+    const wearsLayer = heat < 0.78;
+
+    const items = [
+      { slot: 'Top', color: top, material: pick(mats.Top, t) },
+      { slot: 'Bottom', color: bottom, material: pick(mats.Bottom, t + 1) },
+      wearsLayer
+        ? { slot: layerLabel, color: layer, material: pick(mats.Layer, t + 2) }
+        : { slot: layerLabel, color: null, material: null },
+    ];
+
     return {
       day, short: day.slice(0,3).toUpperCase(), occasion: OCCASION[i],
-      colors: [c1, c2],
-      items: pieces.map(([n], k) => `${k === 1 ? c2.name : c1.name} ${n.toLowerCase()}`),
-      note: `${c1.name} up top, ${c2.name} below, ${TEX_WORD[result.texture]}. Go.`,
-      heat: 0.4 + ((i*17+seed*7) % 60)/100,
+      colors: wearsLayer ? [top, bottom, layer] : [top, bottom],
+      items,
+      note: `${top.name} over ${bottom.name}${wearsLayer ? `, ${layer.name} on top` : ''}. ${TEX_WORD[result.texture][0].toUpperCase()}${TEX_WORD[result.texture].slice(1)}.`,
+      heat,
     };
   });
 }

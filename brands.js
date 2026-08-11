@@ -64,8 +64,8 @@ export const BRANDS = RAW.map(([name, segment, price], i) => ({
     .map(w => w[0]).join('').toUpperCase(),
 }));
 
-// Costliest first: the aspirational end reads at the top, high street falls below.
-const byPrice = (x, y) => y.price - x.price || x.name.localeCompare(y.name);
+// Accessible end first: high street at the top, designer and couture at the end.
+const byPrice = (x, y) => x.price - y.price || x.name.localeCompare(y.name);
 BRANDS.sort(byPrice);
 
 export const SEGMENTS = ['All', ...[...new Set(BRANDS.map(b => b.segment))]];
@@ -143,7 +143,9 @@ export async function loadRemoteBrands() {
   } catch { return REMOTE; }
 }
 
-export const allBrands = () => [...customBrands(), ...REMOTE, ...BRANDS];
+/* Order: labels you added (newest first), then labels others added, then the
+   curated list from most accessible to most expensive. */
+export const allBrands = () => [...customBrands().slice().reverse(), ...REMOTE, ...BRANDS];
 
 export function searchBrands(query, segment) {
   const q = query.trim().toLowerCase();
