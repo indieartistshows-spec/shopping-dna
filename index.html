@@ -13,11 +13,23 @@
 <link rel="stylesheet" href="_ds/modernist-29c04e61-b26d-4267-b3e9-9088ce55ff37/styles.css">
 <script src="_ds/modernist-29c04e61-b26d-4267-b3e9-9088ce55ff37/_ds_bundle.js"></script>
 <style>
-:root{--font-heading:'Space Grotesk',system-ui,sans-serif;--font-body:'Inter',system-ui,sans-serif}
-body{margin:0;background:var(--color-bg);font-family:var(--font-body)}
+:root{--font-heading:'Space Grotesk',system-ui,sans-serif;--font-body:'Inter',system-ui,sans-serif;--ink:#201e1d;--sheet:rgba(32,30,29,.62)}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;max-width:100%;overflow-x:hidden;overscroll-behavior-y:none}
+body{background:var(--color-bg);font-family:var(--font-body);-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+img,svg,canvas,video{max-width:100%;display:block}
+button,input,textarea,select{font:inherit;color:inherit;max-width:100%}
+button{-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:background .15s ease,color .15s ease,border-color .15s ease,transform .08s ease}
+button:not(:disabled){cursor:pointer}
+button:not(:disabled):active{transform:translateY(1px)}
+button:disabled{cursor:not-allowed}
+:focus-visible{outline:2px solid var(--color-text);outline-offset:2px}
+input{border-radius:0}
 a{color:var(--color-neutral-700);text-decoration:none}
 a:hover{color:var(--color-text)}
+::selection{background:var(--color-text);color:var(--color-neutral-100)}
 ::-webkit-scrollbar{width:0;height:0}
+.sdna-scrim{position:fixed;inset:0;background:var(--sheet);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
 @keyframes sdnaRise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @keyframes sdnaSweep{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
 @keyframes sdnaPulse{0%,100%{opacity:.25}50%{opacity:.7}}
@@ -51,7 +63,7 @@ a:hover{color:var(--color-text)}
     <sc-if value="{{ showDevNav }}">
       <div style="display:flex;flex-wrap:wrap;gap:6px;padding:10px 20px;border-bottom:1px solid var(--color-divider)">
         <sc-for list="{{ jumps }}" as="j" hint-placeholder-count="0">
-          <button onClick="{{ j.go }}" style="border:1px solid var(--color-divider);background:transparent;padding:6px 10px;font:600 10px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;cursor:pointer;color:var(--color-text)" style-hover="background:var(--color-neutral-200)">{{ j.label }}</button>
+          <button onClick="{{ j.go }}" style="border:1px solid var(--color-divider);background:transparent;padding:6px 10px;font:600 10px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;cursor:pointer;color:var(--color-text)" style-hover="background:var(--color-neutral-200)" style-active="background:var(--color-neutral-300)">{{ j.label }}</button>
         </sc-for>
       </div>
     </sc-if>
@@ -65,7 +77,7 @@ a:hover{color:var(--color-text)}
           <h1 style="{{ heroTitleStyle }}">Your closet has a secret identity.</h1>
           <div style="{{ heroStepsStyle }}">
             <sc-for list="{{ steps }}" as="s" hint-placeholder-count="4">
-              <div style="background:var(--color-bg);padding:14px 12px 16px">
+              <div style="background:var(--color-surface);padding:16px 14px 18px">
                 <div style="font:700 10px/1 var(--font-body);letter-spacing:.16em;color:var(--color-text)">{{ s.n }}</div>
                 <div style="margin-top:8px;font-size:13px;line-height:1.3;font-weight:500">{{ s.t }}</div>
               </div>
@@ -73,7 +85,7 @@ a:hover{color:var(--color-text)}
           </div>
 
           <div style="margin-top:26px;display:flex;flex-direction:column;gap:8px">
-            <button onClick="{{ goUpload }}" style="width:100%;border:none;background:var(--color-text);color:var(--color-neutral-100);padding:17px 18px;font:700 14px/1 var(--font-body);letter-spacing:.02em;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center" style-hover="background:var(--color-neutral-800)" style-active="background:var(--color-neutral-700)"><span>Alright, read my closet</span><span style="font-size:12px;letter-spacing:.16em">→</span></button>
+            <button onClick="{{ goUpload }}" style="width:100%;border:none;background:var(--color-text);color:var(--color-neutral-100);padding:17px 18px;font:700 14px/1 var(--font-body);letter-spacing:.02em;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center" style-hover="background:var(--color-neutral-800)" style-active="background:var(--color-neutral-700)" style-active="background:var(--color-neutral-700)"><span>Alright, read my closet</span><span style="font-size:12px;letter-spacing:.16em">→</span></button>
           </div>
           <p style="margin:18px 0 0;font-size:11.5px;line-height:1.5;color:var(--color-neutral-600)">Everything happens in your browser. Four numbers get saved: chroma, cloth, cut, tone. That is the whole file.</p>
         </div>
@@ -100,7 +112,7 @@ a:hover{color:var(--color-text)}
                   <button onClick="{{ s.remove }}" style="position:absolute;top:0;right:0;width:24px;height:24px;border:none;background:var(--color-text);color:var(--color-neutral-100);font:700 12px/1 var(--font-body);cursor:pointer">×</button>
                 </sc-if>
                 <sc-if value="{{ s.empty }}">
-                  <button onClick="{{ pickFiles }}" style="{{ s.emptyStyle }}" style-hover="background:var(--color-neutral-300)">
+                  <button onClick="{{ pickFiles }}" style="{{ s.emptyStyle }}" style-hover="background:var(--color-neutral-300)" style-active="background:var(--color-neutral-400)">
                     <span style="font:700 10px/1 var(--font-body);letter-spacing:.14em;color:var(--color-neutral-600)">{{ s.n }}</span>
                     <span style="{{ s.plusStyle }}">{{ s.plus }}</span>
                   </button>
@@ -110,13 +122,13 @@ a:hover{color:var(--color-text)}
           </div>
           <input type="file" accept="image/*,.heic,.heif" multiple ref="{{ fileRef }}" onChange="{{ onFiles }}" style="display:none;position:absolute;width:0;height:0;opacity:0">
 
-          <button onClick="{{ pickFiles }}" style="margin-top:10px;width:100%;border:2px solid var(--color-text);background:transparent;padding:14px 16px;cursor:pointer;text-align:left;color:var(--color-text);display:flex;justify-content:space-between;align-items:center" style-hover="background:var(--color-neutral-200)">
+          <button onClick="{{ pickFiles }}" style="margin-top:10px;width:100%;border:2px solid var(--color-text);background:transparent;padding:14px 16px;cursor:pointer;text-align:left;color:var(--color-text);display:flex;justify-content:space-between;align-items:center" style-hover="background:var(--color-neutral-200)" style-active="background:var(--color-neutral-300)">
             <span style="font:700 11px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase">Grab from camera roll</span>
             <span style="font:700 13px/1 var(--font-body)">+</span>
           </button>
 
           <sc-if value="{{ hasFrames }}" hint-placeholder-val="{{ true }}">
-            <div style="margin-top:16px;border-top:1px solid var(--color-divider);padding-top:10px">
+            <div style="margin-top:16px;background:var(--color-surface);border:1px solid var(--color-divider);padding:12px 14px 14px">
               <div style="display:flex;justify-content:space-between;align-items:baseline">
                 <span style="font:700 10px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase">Signal</span>
                 <span style="font:600 10px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">{{ meterCount }}</span>
@@ -129,9 +141,9 @@ a:hover{color:var(--color-text)}
           </sc-if>
 
           <sc-if value="{{ noFrames }}">
-            <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--color-divider);border-top:1px solid var(--color-divider);border-bottom:1px solid var(--color-divider)">
+            <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--color-divider);border:1px solid var(--color-divider)">
               <sc-for list="{{ uploadTips }}" as="t" hint-placeholder-count="4">
-                <div style="background:var(--color-bg);padding:10px 10px 12px">
+                <div style="background:var(--color-surface);padding:11px 12px 13px">
                   <div style="font:700 9.5px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">{{ t.k }}</div>
                   <div style="margin-top:6px;font-size:12px;line-height:1.3">{{ t.v }}</div>
                 </div>
@@ -187,7 +199,7 @@ a:hover{color:var(--color-text)}
       <!-- ══ TEASER ══ -->
       <sc-if value="{{ atTeaser }}" hint-placeholder-val="{{ true }}">
         <div style="padding-top:34px;display:flex;flex-direction:column;align-items:stretch;gap:22px">
-          <div style="position:relative;background:var(--color-text);color:var(--color-neutral-100);padding:26px 22px;aspect-ratio:4/5;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden">
+          <div style="{{ teaserCardStyle }}">
             <div style="font:700 10px/1 var(--font-body);letter-spacing:.2em;text-transform:uppercase;opacity:.8">Shopping DNA</div>
             <div style="{{ teaserNameStyle }}">{{ resultName }}</div>
             <div style="font:700 10px/1 var(--font-body);letter-spacing:.18em;text-transform:uppercase;opacity:.85">{{ confLabel }}</div>
@@ -231,13 +243,13 @@ a:hover{color:var(--color-text)}
           <p style="margin:0;font-family:var(--font-heading);font-weight:700;font-size:19px;line-height:1.2;letter-spacing:-.01em">{{ resultLine }}</p>
 
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-            <button onClick="{{ openShare }}" style="border:none;background:var(--color-text);color:var(--color-neutral-100);padding:15px 16px;font:700 13px/1 var(--font-body);text-align:left;cursor:pointer" style-hover="background:var(--color-neutral-800)">Put it online</button>
-            <button onClick="{{ goRefine }}" style="border:2px solid var(--color-text);background:transparent;color:var(--color-text);padding:13px 16px;font:600 13px/1 var(--font-body);text-align:left;cursor:pointer" style-hover="background:var(--color-neutral-200)">We got it wrong?</button>
+            <button onClick="{{ openShare }}" style="border:none;background:var(--color-text);color:var(--color-neutral-100);padding:15px 16px;font:700 13px/1 var(--font-body);text-align:left;cursor:pointer" style-hover="background:var(--color-neutral-800)" style-active="background:var(--color-neutral-700)">Put it online</button>
+            <button onClick="{{ goRefine }}" style="border:2px solid var(--color-text);background:transparent;color:var(--color-text);padding:13px 16px;font:600 13px/1 var(--font-body);text-align:left;cursor:pointer" style-hover="background:var(--color-neutral-200)" style-active="background:var(--color-neutral-300)">We got it wrong?</button>
           </div>
 
-          <div style="border-top:2px solid var(--color-text)">
+          <div style="margin-top:2px">
             <sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
-              <div style="display:flex;justify-content:space-between;gap:16px;padding:11px 0;border-bottom:1px solid var(--color-divider);font-size:13px">
+              <div style="display:flex;justify-content:space-between;gap:16px;padding:12px 14px;background:var(--color-surface);border:1px solid var(--color-divider);margin-bottom:-1px;font-size:13.5px">
                 <span style="color:var(--color-neutral-700)">{{ s.k }}</span><b style="font-weight:600;text-align:right">{{ s.v }}</b>
               </div>
             </sc-for>
@@ -305,7 +317,7 @@ a:hover{color:var(--color-text)}
             </div>
           </div>
 
-          <button onClick="{{ saveRefine }}" style="width:100%;border:none;background:var(--color-text);color:var(--color-neutral-100);padding:17px 18px;font:700 14px/1 var(--font-body);text-align:left;cursor:pointer" style-hover="background:var(--color-neutral-800)">Save it and rebuild my week</button>
+          <button onClick="{{ saveRefine }}" style="width:100%;border:none;background:var(--color-text);color:var(--color-neutral-100);padding:17px 18px;font:700 14px/1 var(--font-body);text-align:left;cursor:pointer" style-hover="background:var(--color-neutral-800)" style-active="background:var(--color-neutral-700)">Save it and rebuild my week</button>
         </div>
       </sc-if>
 
@@ -336,7 +348,7 @@ a:hover{color:var(--color-text)}
 
           <div>
             <sc-for list="{{ dayItems }}" as="i" hint-placeholder-count="3">
-              <div style="display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--color-divider)">
+              <div style="display:flex;justify-content:space-between;gap:12px;padding:12px 14px;background:var(--color-surface);border:1px solid var(--color-divider);margin-bottom:-1px">
                 <span style="font-size:13.5px;font-weight:500;text-transform:capitalize">{{ i.name }}</span>
                 <span style="font:600 10px/1.6 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">{{ i.slot }}</span>
               </div>
@@ -346,13 +358,13 @@ a:hover{color:var(--color-text)}
 
           <div style="display:grid;grid-template-columns:1fr auto;gap:8px">
             <button onClick="{{ wearThis }}" style="{{ wearStyle }}">{{ wearLabel }}</button>
-            <button onClick="{{ shuffle }}" style="border:2px solid var(--color-text);background:transparent;color:var(--color-text);padding:13px 16px;font:600 13px/1 var(--font-body);cursor:pointer" style-hover="background:var(--color-neutral-200)">Reroll</button>
+            <button onClick="{{ shuffle }}" style="border:2px solid var(--color-text);background:transparent;color:var(--color-text);padding:13px 16px;font:600 13px/1 var(--font-body);cursor:pointer" style-hover="background:var(--color-neutral-200)" style-active="background:var(--color-neutral-300)">Reroll</button>
           </div>
 
           <div style="border-top:2px solid var(--color-text);padding-top:12px">
             <div style="font:700 10px/1 var(--font-body);letter-spacing:.18em;text-transform:uppercase;color:var(--color-neutral-700)">Rest of the week</div>
             <sc-for list="{{ weekRest }}" as="d" hint-placeholder-count="4">
-              <button onClick="{{ d.pick }}" style="width:100%;border:none;border-bottom:1px solid var(--color-divider);background:transparent;padding:12px 0;display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left;color:var(--color-text)" style-hover="background:var(--color-neutral-200)">
+              <button onClick="{{ d.pick }}" style="width:100%;border:1px solid var(--color-divider);background:var(--color-surface);padding:12px 14px;margin-bottom:-1px;display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left;color:var(--color-text)" style-hover="background:var(--color-neutral-300)" style-active="background:var(--color-neutral-400)">
                 <span style="font:700 10px/1 var(--font-body);letter-spacing:.14em;width:34px">{{ d.short }}</span>
                 <span style="display:flex;gap:2px">
                   <sc-for list="{{ d.colors }}" as="c" hint-placeholder-count="2"><span style="{{ c.miniStyle }}"></span></sc-for>
@@ -384,9 +396,9 @@ a:hover{color:var(--color-text)}
             </sc-for>
           </div>
 
-          <div style="border-top:2px solid var(--color-text)">
+          <div style="margin-top:2px">
             <sc-for list="{{ recs }}" as="p" hint-placeholder-count="6">
-              <div style="display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--color-divider)">
+              <div style="display:flex;gap:14px;padding:14px;background:var(--color-surface);border:1px solid var(--color-divider);margin-bottom:-1px">
                 <div style="{{ p.swatchStyle }}"></div>
                 <div style="flex:1;min-width:0">
                   <div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline">
@@ -398,7 +410,7 @@ a:hover{color:var(--color-text)}
                   <p style="margin:7px 0 0;font-size:12px;line-height:1.4;color:var(--color-neutral-700)">{{ p.why }}</p>
                   <div style="display:flex;gap:6px;margin-top:10px">
                     <button onClick="{{ p.save }}" style="{{ p.saveStyle }}">{{ p.saveLabel }}</button>
-                    <button style="border:1px solid var(--color-divider);background:transparent;color:var(--color-text);padding:8px 12px;font:600 11px/1 var(--font-body);cursor:pointer" style-hover="background:var(--color-neutral-200)">Style it</button>
+                    <button style="border:1px solid var(--color-divider);background:transparent;color:var(--color-text);padding:8px 12px;font:600 11px/1 var(--font-body);cursor:pointer" style-hover="background:var(--color-neutral-200)" style-active="background:var(--color-neutral-300)">Style it</button>
                   </div>
                 </div>
               </div>
@@ -424,9 +436,9 @@ a:hover{color:var(--color-text)}
             </div>
           </div>
 
-          <div style="border-top:2px solid var(--color-text)">
+          <div style="margin-top:2px">
             <sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
-              <div style="display:flex;justify-content:space-between;gap:16px;padding:11px 0;border-bottom:1px solid var(--color-divider);font-size:13px">
+              <div style="display:flex;justify-content:space-between;gap:16px;padding:12px 14px;background:var(--color-surface);border:1px solid var(--color-divider);margin-bottom:-1px;font-size:13.5px">
                 <span style="color:var(--color-neutral-700)">{{ s.k }}</span><b style="font-weight:600;text-align:right">{{ s.v }}</b>
               </div>
             </sc-for>
@@ -445,8 +457,8 @@ a:hover{color:var(--color-text)}
           </div>
 
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-            <button onClick="{{ openShare }}" style="border:none;background:var(--color-text);color:var(--color-neutral-100);padding:15px 16px;font:700 13px/1 var(--font-body);text-align:left;cursor:pointer" style-hover="background:var(--color-neutral-800)">Put it online</button>
-            <button onClick="{{ goRefine }}" style="border:2px solid var(--color-text);background:transparent;color:var(--color-text);padding:13px 16px;font:600 13px/1 var(--font-body);text-align:left;cursor:pointer" style-hover="background:var(--color-neutral-200)">Correct us</button>
+            <button onClick="{{ openShare }}" style="border:none;background:var(--color-text);color:var(--color-neutral-100);padding:15px 16px;font:700 13px/1 var(--font-body);text-align:left;cursor:pointer" style-hover="background:var(--color-neutral-800)" style-active="background:var(--color-neutral-700)">Put it online</button>
+            <button onClick="{{ goRefine }}" style="border:2px solid var(--color-text);background:transparent;color:var(--color-text);padding:13px 16px;font:600 13px/1 var(--font-body);text-align:left;cursor:pointer" style-hover="background:var(--color-neutral-200)" style-active="background:var(--color-neutral-300)">Correct us</button>
           </div>
           <button onClick="{{ restart }}" style="border:none;background:transparent;padding:6px 0;font:600 12px/1 var(--font-body);text-decoration:underline;text-underline-offset:3px;text-align:left;cursor:pointer;color:var(--color-neutral-700)">Start over, read me again</button>
         </div>
@@ -465,9 +477,9 @@ a:hover{color:var(--color-text)}
 
     <!-- ══ EMAIL GATE ══ -->
     <sc-if value="{{ gateOpen }}">
-      <div style="position:fixed;inset:0;z-index:90;background:color-mix(in srgb, var(--color-text) 62%, transparent);display:flex;flex-direction:column;justify-content:flex-end">
+      <div class="sdna-scrim" style="{{ scrimStyle }}">
         <button onClick="{{ closeGate }}" style="flex:1;border:none;background:transparent;cursor:pointer"></button>
-        <div style="width:100%;max-width:480px;margin:0 auto;background:var(--color-bg);border-top:2px solid var(--color-text);padding:22px 20px 36px;animation:sdnaCardIn .35s cubic-bezier(.2,.8,.2,1) both">
+        <div style="{{ sheetStyle }}">
           <div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--color-text);padding-bottom:8px">
             <span style="font:700 10px/1 var(--font-body);letter-spacing:.18em;text-transform:uppercase">Last thing</span>
             <button onClick="{{ closeGate }}" style="border:none;background:transparent;font:700 10px/1 var(--font-body);letter-spacing:.14em;cursor:pointer;color:var(--color-neutral-700)">LATER</button>
@@ -484,7 +496,7 @@ a:hover{color:var(--color-text)}
             </sc-if>
           </div>
 
-          <button onClick="{{ submitGate }}" style="margin-top:10px;width:100%;border:none;background:var(--color-text);color:var(--color-neutral-100);padding:17px 18px;font:700 14px/1 var(--font-body);text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center" style-hover="background:var(--color-neutral-800)"><span>Unmask it</span><span style="font-size:12px">→</span></button>
+          <button onClick="{{ submitGate }}" style="margin-top:10px;width:100%;border:none;background:var(--color-text);color:var(--color-neutral-100);padding:17px 18px;font:700 14px/1 var(--font-body);text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center" style-hover="background:var(--color-neutral-800)" style-active="background:var(--color-neutral-700)"><span>Unmask it</span><span style="font-size:12px">→</span></button>
 
           <p style="margin:14px 0 0;font-size:11px;line-height:1.5;color:var(--color-neutral-600)">Four measurements and an email. No photos, no resale, one tap and you are out.</p>
         </div>
@@ -493,9 +505,9 @@ a:hover{color:var(--color-text)}
 
     <!-- ══ SHARE SHEET ══ -->
     <sc-if value="{{ shareOpen }}">
-      <div style="position:fixed;inset:0;z-index:80;background:color-mix(in srgb, var(--color-text) 55%, transparent);display:flex;flex-direction:column;justify-content:flex-end">
+      <div class="sdna-scrim" style="{{ scrimStyleB }}">
         <button onClick="{{ closeShare }}" style="flex:1;border:none;background:transparent;cursor:pointer"></button>
-        <div style="width:100%;max-width:480px;margin:0 auto;background:var(--color-bg);border-top:2px solid var(--color-text);padding:20px 20px 40px;animation:sdnaRise .3s ease both">
+        <div style="{{ sheetStyleB }}">
           <div style="display:flex;justify-content:space-between;align-items:baseline">
             <div style="font-family:var(--font-heading);font-weight:700;font-size:20px;letter-spacing:-.02em;text-transform:uppercase">Share the card</div>
             <button onClick="{{ closeShare }}" style="border:none;background:transparent;font:700 12px/1 var(--font-body);letter-spacing:.14em;cursor:pointer;color:var(--color-neutral-700)">CLOSE</button>
@@ -508,8 +520,8 @@ a:hover{color:var(--color-text)}
             </div>
           </div>
           <div style="margin-top:16px;display:flex;flex-direction:column;gap:6px">
-            <button onClick="{{ downloadCard }}" style="width:100%;border:none;background:var(--color-text);color:var(--color-neutral-100);padding:15px 16px;font:700 13px/1 var(--font-body);text-align:left;cursor:pointer" style-hover="background:var(--color-neutral-800)">Download 1080 × 1920</button>
-            <button onClick="{{ copyLink }}" style="width:100%;border:2px solid var(--color-text);background:transparent;color:var(--color-text);padding:13px 16px;font:600 13px/1 var(--font-body);text-align:left;cursor:pointer" style-hover="background:var(--color-neutral-200)">{{ copyLabel }}</button>
+            <button onClick="{{ downloadCard }}" style="width:100%;border:none;background:var(--color-text);color:var(--color-neutral-100);padding:15px 16px;font:700 13px/1 var(--font-body);text-align:left;cursor:pointer" style-hover="background:var(--color-neutral-800)" style-active="background:var(--color-neutral-700)">Download 1080 × 1920</button>
+            <button onClick="{{ copyLink }}" style="width:100%;border:2px solid var(--color-text);background:transparent;color:var(--color-text);padding:13px 16px;font:600 13px/1 var(--font-body);text-align:left;cursor:pointer" style-hover="background:var(--color-neutral-200)" style-active="background:var(--color-neutral-300)">{{ copyLabel }}</button>
           </div>
           <p style="margin:12px 0 0;font-size:11.5px;color:var(--color-neutral-600)">{{ shareNote }}</p>
         </div>
@@ -564,6 +576,16 @@ class Component extends DCLogic {
         });
       });
     }
+  }
+
+  componentDidUpdate() {
+    document.body.style.overflow = (this.state.gateOpen || this.state.shareOpen) ? 'hidden' : '';
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.timer);
+    document.body.style.overflow = '';
+    this.mq?.removeEventListener('change', this.onMq);
   }
 
   async load() {
@@ -961,6 +983,13 @@ class Component extends DCLogic {
         style: `border:none;background:${tab === k ? 'var(--color-text)' : 'transparent'};color:${tab === k ? 'var(--color-neutral-100)' : 'var(--color-neutral-700)'};padding:16px 0 18px;font:700 10.5px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;cursor:pointer`,
         pick: () => this.setState({ tab: k }),
       })),
+
+      /* overlays: bottom sheet on mobile, centred modal on desktop */
+      scrimStyle: `z-index:90;display:flex;flex-direction:column;justify-content:${s.isDesktop ? 'center' : 'flex-end'};align-items:center;padding:${s.isDesktop ? '24px' : '0'}`,
+      scrimStyleB: `z-index:80;display:flex;flex-direction:column;justify-content:${s.isDesktop ? 'center' : 'flex-end'};align-items:center;padding:${s.isDesktop ? '24px' : '0'}`,
+      sheetStyle: `width:100%;max-width:480px;max-height:${s.isDesktop ? '90vh' : 'none'};overflow:auto;background:var(--color-bg);border:${s.isDesktop ? '2px solid var(--color-text)' : 'none'};border-top:2px solid var(--color-text);box-shadow:0 ${s.isDesktop ? '20px' : '-18px'} 44px rgba(32,30,29,.3);padding:22px 20px calc(${s.isDesktop ? '24px' : '36px'} + env(safe-area-inset-bottom,0px));animation:sdnaCardIn .35s cubic-bezier(.2,.8,.2,1) both`,
+      sheetStyleB: `width:100%;max-width:480px;max-height:${s.isDesktop ? '90vh' : 'none'};overflow:auto;background:var(--color-bg);border:${s.isDesktop ? '2px solid var(--color-text)' : 'none'};border-top:2px solid var(--color-text);box-shadow:0 ${s.isDesktop ? '20px' : '-18px'} 44px rgba(32,30,29,.3);padding:20px 20px calc(${s.isDesktop ? '24px' : '40px'} + env(safe-area-inset-bottom,0px));animation:sdnaRise .3s ease both`,
+      teaserCardStyle: `position:relative;width:100%;max-width:${s.isDesktop ? 380 : 999}px;background:var(--color-text);color:var(--color-neutral-100);padding:26px 22px;aspect-ratio:4/5;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;animation:sdnaCardIn .55s cubic-bezier(.2,.8,.2,1) both`,
 
       /* email gate */
       gateOpen: s.gateOpen,
