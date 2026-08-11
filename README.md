@@ -98,6 +98,36 @@ create policy "own reads select"
 
 The RLS `using` clause is what makes the cap trustworthy: one account cannot see or inflate another's count.
 
+### 1c. Brand suggestions table
+
+Labels visitors add themselves are stored here and merged into everyone's picker.
+
+```sql
+create table if not exists public.brand_suggestions (
+  id          bigint generated always as identity primary key,
+  created_at  timestamptz not null default now(),
+  name        text not null,
+  user_id     uuid references auth.users (id),
+  email       text
+);
+
+create unique index if not exists brand_suggestions_name_key
+  on public.brand_suggestions (lower(name));
+
+alter table public.brand_suggestions enable row level security;
+
+-- anyone may read the list, anyone may propose a label
+drop policy if exists "read brand suggestions" on public.brand_suggestions;
+create policy "read brand suggestions"
+  on public.brand_suggestions for select to anon, authenticated using (true);
+
+drop policy if exists "add brand suggestion" on public.brand_suggestions;
+create policy "add brand suggestion"
+  on public.brand_suggestions for insert to anon, authenticated with check (true);
+```
+
+Until this table exists the picker still works — added labels simply stay on the visitor's own device.
+
 ### 2. Google OAuth credentials
 
 1. **console.cloud.google.com** → create or pick a project.
@@ -173,6 +203,7 @@ Two rules keep results distinct:
 
 ## Version log
 
+- **0.8.1** — Brand picker actions pinned to the bottom of the viewport on phone and desktop. Custom labels are saved to Supabase and merged into everyone's list.
 - **0.8.0** — Five reads per account per day, enforced against Supabase with row-level security. At the cap the first-screen button offers the account's latest card instead of a new read.
 - **0.7.1** — Sign-in resume hardened: the in-progress read survives the OAuth round trip even when Supabase returns to the Site URL, and Google errors are shown instead of silently dropping to the first screen.
 - **0.7.0** — Name/email form replaced with Google sign-in through Supabase Auth. Leads now carry the auth user id.

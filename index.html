@@ -400,9 +400,11 @@ a:hover{color:var(--color-text)}
             <button onClick="{{ focusSearch }}" style="border:1px dashed var(--color-neutral-500);background:transparent;color:var(--color-neutral-700);padding:13px 16px;font:600 12.5px/1 var(--font-body);text-align:left;cursor:pointer" style-hover="border-color:var(--color-text);color:var(--color-text);background:var(--color-neutral-200)">Brand not listed? Type its name in the search box to add it.</button>
           </sc-if>
 
-          <div style="display:grid;grid-template-columns:1fr auto;gap:8px;padding-top:4px">
-            <button onClick="{{ saveBrands }}" style="{{ brandCtaStyle }}"><span>{{ brandCtaLabel }}</span><span style="font-size:12px">→</span></button>
-            <button onClick="{{ skipBrands }}" style="border:2px solid var(--color-text);background:transparent;color:var(--color-text);padding:13px 16px;font:600 13px/1 var(--font-body);cursor:pointer" style-hover="background:var(--color-neutral-200)" style-active="background:var(--color-neutral-300)">Skip</button>
+          <div style="{{ brandBarStyle }}">
+            <div style="display:grid;grid-template-columns:1fr auto;gap:8px">
+              <button onClick="{{ saveBrands }}" style="{{ brandCtaStyle }}"><span>{{ brandCtaLabel }}</span><span style="font-size:12px">→</span></button>
+              <button onClick="{{ skipBrands }}" style="border:2px solid var(--color-text);background:transparent;color:var(--color-text);padding:13px 16px;font:600 13px/1 var(--font-body);cursor:pointer" style-hover="background:var(--color-neutral-200)" style-active="background:var(--color-neutral-300)">Skip</button>
+            </div>
           </div>
         </div>
       </sc-if>
@@ -708,6 +710,8 @@ class Component extends DCLogic {
         if (saved.length) this.setState({ brands: saved.slice(0, 5) });
       } catch (e) {}
       this.forceUpdate();
+      // Pull in labels other visitors have added.
+      this.brandLib.loadRemoteBrands().then(() => this.forceUpdate()).catch(() => {});
     }
     return this.eng;
   }
@@ -1160,7 +1164,7 @@ class Component extends DCLogic {
         : `Nothing called “${s.brandQuery.trim()}” in the list.`,
       addLabel: `Add “${s.brandQuery.trim()}”`,
       addBrand: () => {
-        const entry = this.brandLib?.addCustomBrand(this.state.brandQuery);
+        const entry = this.brandLib?.addCustomBrand(this.state.brandQuery, this.state.user);
         if (!entry) return;
         this.setState(st => {
           const brands = st.brands.includes(entry.id) || st.brands.length >= 5
@@ -1187,7 +1191,9 @@ class Component extends DCLogic {
         };
       }),
       brandCtaLabel: s.brands.length ? `Build my week around these ${s.brands.length}` : 'Build my week',
-      brandCtaStyle: 'border:none;background:var(--color-text);color:var(--color-neutral-100);padding:16px 18px;font:700 13.5px/1 var(--font-body);text-align:left;display:flex;justify-content:space-between;align-items:center;cursor:pointer',
+      brandCtaStyle: 'border:none;background:var(--color-text);color:var(--color-neutral-100);padding:16px 18px;font:700 13.5px/1 var(--font-body);text-align:left;display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer',
+      // Sticks to the bottom of the viewport so the two actions are always reachable.
+      brandBarStyle: `position:sticky;bottom:0;z-index:30;margin:4px -20px 0;padding:12px 20px calc(12px + env(safe-area-inset-bottom,0px));background:var(--color-bg);border-top:2px solid var(--color-text);box-shadow:0 -10px 24px ${s.isDesktop ? 'rgba(32,30,29,.10)' : 'rgba(32,30,29,.14)'}`,
       goBrands: () => this.setState({ screen: 'brands' }),
       brandsSummary: s.brands.length ? `Your ${s.brands.length} brands` : 'Pick your brands',
       saveBrands: this.saveBrands,

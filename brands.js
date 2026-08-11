@@ -1,5 +1,9 @@
 // 100 Indian apparel labels, grouped by the segment a shopper would recognise.
 // [name, segment, price band 1-4]
+import { SUPABASE_URL, SUPABASE_ANON_KEY, isConfigured } from './leads.js';
+
+const apiBase = () => SUPABASE_URL.replace(/\/+$/, '').replace(/\/rest\/v1$/, '');
+
 const RAW = [
   ['Sabyasachi','Couture',4],['Manish Malhotra','Couture',4],['Tarun Tahiliani','Couture',4],
   ['Rohit Bal','Couture',4],['Gaurav Gupta','Couture',4],['Falguni Shane Peacock','Couture',4],
@@ -66,18 +70,17 @@ BRANDS.sort(byPrice);
 
 export const SEGMENTS = ['All', ...[...new Set(BRANDS.map(b => b.segment))]];
 
-/* Labels the user adds themselves, kept per device. */
+/* Labels the user adds themselves. Kept locally for instant feedback and
+   pushed to Supabase so the list grows for everyone. */
 const CUSTOM_KEY = 'sdna.customBrands';
+let REMOTE = [];
+
 export function customBrands() {
   try { return JSON.parse(localStorage.getItem(CUSTOM_KEY) || '[]'); } catch { return []; }
 }
-export function addCustomBrand(name) {
-  const clean = name.trim().replace(/\s+/g, ' ').slice(0, 40);
-  if (!clean) return null;
-  const existing = [...BRANDS, ...customBrands()]
-    .find(b => b.name.toLowerCase() === clean.toLowerCase());
-  if (existing) return existing;
-  const entry = {
+
+function makeEntry(clean) {
+  return {
     id: 'c' + Date.now().toString(36),
     name: clean,
     segment: 'Yours',
@@ -87,10 +90,60 @@ export function addCustomBrand(name) {
     initials: clean.replace(/[^A-Za-z0-9 ]/g, '').split(/\s+/).filter(Boolean).slice(0, 2)
       .map(w => w[0]).join('').toUpperCase(),
   };
+}
+
+export function addCustomBrand(name, user = null) {
+  const clean = name.trim().replace(/\s+/g, ' ').slice(0, 40);
+  if (!clean) return null;
+  const existing = allBrands().find(b => b.name.toLowerCase() === clean.toLowerCase());
+  if (existing) return existing;
+  const entry = makeEntry(clean);
   try { localStorage.setItem(CUSTOM_KEY, JSON.stringify([...customBrands(), entry])); } catch {}
+  pushSuggestion(entry, user);
   return entry;
 }
-export const allBrands = () => [...customBrands(), ...BRANDS];
+
+/* Send the new label to Supabase. Fire and forget — a failure only means the
+   brand stays on this device. */
+async function pushSuggestion(entry, user) {
+  if (!isConfigured()) return;
+  try {
+    await fetch(`${apiBase()}/rest/v1/brand_suggestions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${user?.token || SUPABASE_ANON_KEY}`,
+        Prefer: 'return=minimal',
+      },
+      body: JSON.stringify([{
+        name: entry.name,
+        user_id: user?.id || null,
+        email: (user?.email || '').toLowerCase() || null,
+      }]),
+    });
+  } catch {}
+}
+
+/* Everything other visitors have added, merged into the picker. */
+export async function loadRemoteBrands() {
+  if (!isConfigured()) return REMOTE;
+  try {
+    const res = await fetch(
+      `${apiBase()}/rest/v1/brand_suggestions?select=name&order=name.asc&limit=500`,
+      { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } });
+    if (!res.ok) return REMOTE;
+    const rows = await res.json();
+    const mine = new Set(customBrands().map(b => b.name.toLowerCase()));
+    const listed = new Set(BRANDS.map(b => b.name.toLowerCase()));
+    REMOTE = rows
+      .filter(r => r.name && !mine.has(r.name.toLowerCase()) && !listed.has(r.name.toLowerCase()))
+      .map(r => ({ ...makeEntry(r.name), id: 'r' + r.name.toLowerCase().replace(/\W+/g, ''), community: true }));
+    return REMOTE;
+  } catch { return REMOTE; }
+}
+
+export const allBrands = () => [...customBrands(), ...REMOTE, ...BRANDS];
 
 export function searchBrands(query, segment) {
   const q = query.trim().toLowerCase();
