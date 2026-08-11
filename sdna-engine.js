@@ -809,3 +809,59 @@ const MARKS = {
 };
 
 export const animalMark = species => (MARKS[species] || MARKS.Panther)();
+
+/* ── Walk-In: the colour × brand matrix ──
+   Every suggestion is one brand the visitor picked crossed with one colour
+   their read supports, in a garment their cut and cloth call for. Nothing is
+   invented outside those three axes. */
+
+const GARMENTS = {
+  sleek:     [['Rib knit tee','Top'],['Straight leg trouser','Bottom'],['Cropped jacket','Outer'],['Slip dress','Whole'],['Fine gauge polo','Top']],
+  tailored:  [['Poplin shirt','Top'],['Pleated trouser','Bottom'],['Single breast blazer','Outer'],['Shirt dress','Whole'],['Merino crew','Top']],
+  relaxed:   [['Boxy tee','Top'],['Wide leg jean','Bottom'],['Unstructured overshirt','Outer'],['Column dress','Whole'],['Crew sweat','Top']],
+  oversized: [['Dropped shoulder knit','Top'],['Carpenter trouser','Bottom'],['Long line coat','Outer'],['Tent dress','Whole'],['Rugby shirt','Top']],
+};
+
+const CLOTH = {
+  smooth:     ['poplin','sateen','fine twill','mercerised cotton'],
+  structured: ['canvas','heavy twill','wool suiting','denim'],
+  soft:       ['brushed cotton','lambswool','fleeceback','flannel'],
+  fluid:      ['cupro','viscose','washed silk','tencel'],
+};
+
+const TIER_BASE = [1400, 3200, 7500, 18000];
+
+export function walkIn(result, brands, monk, seed = 0, limit = 12) {
+  if (!brands || !brands.length) return [];
+  const palette = recommendPalette(monk, result.undertone, result.family);
+  if (!palette.length) return [];
+  const garments = GARMENTS[result.fit] || GARMENTS.relaxed;
+  const cloths = CLOTH[result.texture] || CLOTH.smooth;
+  const out = [];
+  // Walk the matrix on a diagonal so no brand and no colour clusters.
+  for (let n = 0; out.length < limit && n < brands.length * palette.length; n++) {
+    const b = brands[(n + seed) % brands.length];
+    const c = palette[(n * 3 + seed) % palette.length];
+    const [name, slot] = garments[(n * 2 + seed) % garments.length];
+    const cloth = cloths[(n + seed) % cloths.length];
+    const tier = Math.max(1, Math.min(4, b.price || 2));
+    const price = Math.round((TIER_BASE[tier - 1] * (0.8 + ((n * 37) % 45) / 100)) / 50) * 50;
+    out.push({
+      id: `${b.id}-${c.name}-${n}`,
+      brand: b.name,
+      brandId: b.id,
+      initials: b.initials || b.name.slice(0, 2).toUpperCase(),
+      title: name,
+      slot,
+      cloth,
+      color: c,
+      price,
+      priceLabel: '₹' + price.toLocaleString('en-IN'),
+      match: 98 - n * 2,
+      why: n % 3 === 0 ? `${c.name} against your skin tone, not your wardrobe.`
+        : n % 3 === 1 ? `${b.name} cuts ${result.fit}, which is how you already dress.`
+        : `${cloth[0].toUpperCase() + cloth.slice(1)} reads ${result.texture} in the hand.`,
+    });
+  }
+  return out;
+}

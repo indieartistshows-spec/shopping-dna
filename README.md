@@ -1,6 +1,8 @@
 # Shopping DNA
 
-An on-device style identity read. Four photos in, one of eighty identities out, then a weekly outfit plan. Photos never leave the browser: MediaPipe Tasks Vision runs client-side and no image is uploaded.
+An on-device style identity read. Four photos in, one of eighty identities out. Photos never leave the browser: MediaPipe Tasks Vision runs client-side and no image is uploaded.
+
+The flow ends at the reveal: **intro → upload → read → teaser → Google gate → brand picker → reveal**.
 
 ## Stack
 
@@ -9,8 +11,10 @@ Static site. No build step, no framework install.
 | File | What it is |
 | --- | --- |
 | `index.html` | The whole app — markup, screens and logic. Design tokens are inlined, so it has no external stylesheet |
+| `image-slot.js` | Drag-and-drop image placeholder used by the editorial figure |
+| `editorial-figure.jpg` | The hero and reveal photograph |
 | `sdna-engine.js` | Classification engine: colour science, k-means, texture, fit, palettes, animal marks |
-| `brands.js` | The 100 Indian labels, their segments and price bands |
+| `brands.js` | The 100 Indian labels, their segments and price bands, plus shared custom suggestions |
 | `auth.js` | Google sign-in via Supabase Auth |
 | `quota.js` | Five reads per account per day |
 | `leads.js` | Writes the signed-in user to Supabase |
@@ -203,6 +207,14 @@ Editorial, after Rue Noire and MADNESS. Playfair Display set large for display �
 
 Slots: `hero-figure` on the intro. Add more by dropping `<image-slot id="…" shape="rect">` into a sized wrapper.
 
+## Walk-In
+
+The second tab (formerly Today). It is the colour × brand matrix: every suggestion is one label the visitor picked crossed with one colour their read supports, in a garment their cut calls for and a cloth their texture calls for. Nothing is invented outside those three axes.
+
+`walkIn(result, brands, monk, seed, limit)` in `sdna-engine.js` walks the matrix diagonally so no brand and no colour clusters. Prices come from the brand's own tier (`₹`–`₹₹₹₹` in `brands.js`), not from the garment. With no brands picked the tab shows a prompt to go pick some rather than inventing labels.
+
+The old day-by-day outfit list (Top / Bottom / Layer) is gone, along with `weekPlan`.
+
 ## Photo acceptance
 
 Deliberately forgiving. Pose detection measures CUT but is no longer a gate — a photo with no usable pose still yields colour and cloth, which is most of the identity. When the portrait segmenter finds no clothing class (common on unusual crops) the engine samples the torso directly: from the shoulders when pose gives them, otherwise the central lower two thirds of the frame, excluding face and hair. Reads that lean on that fallback are weighted at roughly half a clean read rather than discarded, so leniency never quietly becomes inaccuracy. Only a frame with almost no usable pixels is refused.
@@ -217,9 +229,13 @@ Two rules keep results distinct:
 
 ## Version log
 
+- **0.14.0** — Flow now ends at the reveal. Today and Walk-In are gone, along with the product catalogue and the tab bar. The brand picker moved to sit between the sign-in gate and the reveal, with Skip intact; the reveal gained the working palette and a restart link.
+
+- **0.13.0** — Today replaced by **Walk-In**: product suggestions drawn from the visitor’s own brand picks crossed with their DNA palette. Removed the Top/Bottom/Layer outfit list and the week planner. Mount is now guarded so a Supabase outage cannot strand the app on a blank screen.
 - **0.12.5** — Headline overlaps the photograph; solid ink rather than a blend mode, which was dissolving the letters into the dark fabric.
 - **0.12.4** — Supplied editorial photograph replaces the Pexels stock across all three slots; frames set to 16:9 to match it.
 - **0.12.3** — Pexels stock photography wired into three slots (hero, reveal, week). User drops still override.
+- **0.14.0** — Five brands wired to real products: Fabindia, Nicobar, Allen Solly, Westside, Levi's. `catalog.js` holds a seed of real garment lines with working brand-search links, and reads an optional Supabase `products` table that overrides it and can carry real photographs. Wired brands sort to the front of the picker and are tagged IN STORE; everything else is tagged CONCEPT.
 - **0.12.2** — Display face changed from Bodoni Moda to Playfair Display at weight 500; Bodoni’s hairlines went fragile at phone sizes.
 - **0.12.1** — Marquee seams now bleed to the real column edge at both breakpoints (they overhung by 20px on desktop). Lifted burgundy moved into a `--burgundy-lift` token instead of a hex piped through a template hole.
 - **0.12.0** — Editorial direction applied: Bodoni Moda display over Inter, burgundy accent, marquee seams, rotated gutters, butted tiles, drag-and-drop photography slots.
@@ -241,3 +257,43 @@ Two rules keep results distinct:
 - **0.3.0** — UI pass: box-sizing reset (fixed horizontal bleed), surface/ground separation, press and focus states, blurred scrims with scroll lock, centred modals on desktop.
 - **0.2.0** — Responsive: real web app on mobile, website on desktop.
 - **0.1.0** — First flow: intro, upload, read, reveal, correct, weekly plan.
+
+
+## Real products (v0.14.0)
+
+Five brands have real catalogues behind them: **Fabindia, Nicobar, Allen Solly, Westside, Levi's**. Their cards are tagged IN STORE, carry a real price band, and the View button opens that brand's own site search for the garment. Every other label in the picker is tagged CONCEPT — the grid still generates a plausible product, but nothing behind it is real.
+
+### Adding real photos and real product URLs
+
+The seed catalogue has no photographs, because I can't fetch retailer imagery. Rows in a Supabase `products` table override the seed and can carry both a photo and a direct product link. Run this once:
+
+```sql
+create table if not exists public.products (
+  id          bigint generated always as identity primary key,
+  created_at  timestamptz not null default now(),
+  brand       text not null,
+  title       text not null,
+  slot        text,            -- Top | Bottom | Layer
+  cloth       text,            -- linen, denim, poplin...
+  fits        text[],          -- sleek | tailored | relaxed | oversized
+  families    text[],          -- achromatic | neutral | muted | rich | vivid
+  color_name  text,            -- pins the card to one colour
+  color_hex   text,
+  price       numeric,
+  url         text,            -- direct product page
+  image_url   text             -- product photograph
+);
+
+alter table public.products enable row level security;
+
+create policy "read products" on public.products
+  for select to anon, authenticated using (true);
+```
+
+Then import a CSV in Table Editor, or paste rows. Leave `fits` and `families` empty and the product is offered in every cut and colour; fill them and it only appears where it belongs.
+
+Photographs must be publicly reachable and allow hotlinking. Many retailer CDNs block it — if a photo fails to load the card falls back to its colour field, so a broken URL degrades quietly rather than leaving a hole.
+
+### Going properly live
+
+`loadRemote()` in `catalog.js` is the single swap point. Point it at an affiliate feed reader instead of the `products` table and every consumer picks it up unchanged. That needs an affiliate account (Cuelinks and INRDeals both cover Indian retailers) and a scheduled job to refresh the table — feeds are too large to parse in a browser.

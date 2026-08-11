@@ -57,13 +57,6 @@ a:hover{color:var(--color-text)}
         <span style="font:600 10px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600);white-space:nowrap">{{ barTitle }}</span>
       </div>
       <div style="display:flex;align-items:center;gap:18px">
-        <sc-if value="{{ showTopNav }}">
-          <nav style="display:flex;gap:4px">
-            <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="2">
-              <button onClick="{{ t.pick }}" style="{{ t.topStyle }}">{{ t.label }}</button>
-            </sc-for>
-          </nav>
-        </sc-if>
         <span style="font:600 10px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600);white-space:nowrap">{{ barRight }}</span>
       </div>
     </header>
@@ -309,7 +302,90 @@ a:hover{color:var(--color-text)}
             <p style="margin:12px 0 0;font-size:11.5px;line-height:1.6;letter-spacing:.04em;color:var(--color-neutral-600)">{{ readout }}</p>
           </div>
 
-          <button onClick="{{ enterApp }}" style="width:100%;border:none;background:var(--color-text);color:var(--color-neutral-100);padding:17px 18px;font:700 14px/1 var(--font-body);text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center" style-hover="background:var(--color-text)"><span>Suit up for the week</span><span style="font-size:12px">→</span></button>
+          <div>
+            <div style="font:700 10px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-700)">Colours that will not fight you</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px">
+              <sc-for list="{{ recPalette }}" as="c" hint-placeholder-count="6">
+                <div>
+                  <div style="{{ c.swatchStyle }}"></div>
+                  <div style="margin-top:5px;font-size:10.5px;line-height:1.25;color:var(--color-neutral-700)">{{ c.name }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <button onClick="{{ restart }}" style="border:none;background:transparent;padding:6px 0;font:600 12px/1 var(--font-body);text-decoration:underline;text-underline-offset:3px;text-align:left;cursor:pointer;color:var(--color-neutral-700)">Start over, read me again</button>
+        </div>
+      </sc-if>
+
+      <!-- ══ BRANDS ══ -->
+      <sc-if value="{{ atBrands }}" hint-placeholder-val="{{ true }}">
+        <div style="padding-top:22px;display:flex;flex-direction:column;gap:16px">
+          <div>
+            <h2 style="{{ brandTitleStyle }}">Who do you <i style="font-weight:500">actually</i> shop?</h2>
+            <p style="margin:10px 0 0;font-size:13.5px;line-height:1.45;color:var(--color-neutral-800)">Mark up to five. We cross them with the colours your read supports, so the identity knows where you actually shop.</p>
+          </div>
+
+          <div style="position:sticky;top:58px;z-index:20;background:var(--color-bg);padding-bottom:10px">
+            <input type="search" placeholder="Search 100 labels, or type your own" ref="{{ searchRef }}" value="{{ brandQuery }}" onInput="{{ setBrandQuery }}" style="width:100%;border:2px solid var(--color-text);background:var(--color-neutral-100);padding:14px;font:400 14px/1 var(--font-body);color:var(--color-text)" style-focus="outline:none;background:var(--color-bg)">
+
+            <div style="display:flex;gap:4px;overflow-x:auto;padding:10px 0 0">
+              <sc-for list="{{ segments }}" as="g" hint-placeholder-count="9">
+                <button onClick="{{ g.pick }}" style="{{ g.style }}">{{ g.label }}</button>
+              </sc-for>
+            </div>
+
+            <div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--color-text);padding:10px 0 8px">
+              <span style="font:700 10px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase">{{ pickedLabel }}</span>
+              <span style="font:600 10px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">{{ resultCount }}</span>
+            </div>
+          </div>
+
+          <sc-if value="{{ hasPicks }}">
+            <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:-6px">
+              <sc-for list="{{ picked }}" as="p" hint-placeholder-count="0">
+                <button onClick="{{ p.toggle }}" style="display:flex;align-items:center;gap:8px;border:none;background:var(--color-text);color:var(--color-neutral-100);padding:9px 12px;font:600 12px/1 var(--font-body);cursor:pointer" style-hover="background:var(--color-neutral-800)">
+                  <span>{{ p.name }}</span><span style="font-size:13px;opacity:.7">×</span>
+                </button>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <div style="{{ brandGridStyle }}">
+            <sc-for list="{{ brandTiles }}" as="b" hint-placeholder-count="24">
+              <button onClick="{{ b.toggle }}" style="{{ b.style }}">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px;width:100%">
+                  <span style="{{ b.markStyle }}">{{ b.initials }}</span>
+                  <span style="{{ b.tickStyle }}">{{ b.tick }}</span>
+                </div>
+                <div style="width:100%">
+                  <div style="{{ b.nameStyle }}">{{ b.name }}</div>
+                  <div style="display:flex;justify-content:space-between;gap:6px;margin-top:5px;font:600 9.5px/1 var(--font-body);letter-spacing:.1em;text-transform:uppercase;opacity:.66">
+                    <span>{{ b.segment }}</span><span>{{ b.priceLabel }}</span>
+                  </div>
+                </div>
+              </button>
+            </sc-for>
+          </div>
+
+          <sc-if value="{{ canAddBrand }}">
+            <div style="background:var(--color-surface);border:1px solid var(--color-divider);padding:16px">
+              <div style="font-size:13.5px;font-weight:600;line-height:1.3">{{ addPrompt }}</div>
+              <p style="margin:6px 0 0;font-size:12.5px;color:var(--color-neutral-700)">Add it and we will treat it like any other label on the list.</p>
+              <button onClick="{{ addBrand }}" style="margin-top:12px;width:100%;border:none;background:var(--color-text);color:var(--color-neutral-100);padding:13px 16px;font:700 12.5px/1 var(--font-body);text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center" style-hover="background:var(--color-neutral-800)"><span>{{ addLabel }}</span><span style="font-size:13px">+</span></button>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ showAddHint }}">
+            <button onClick="{{ focusSearch }}" style="border:1px dashed var(--color-neutral-500);background:transparent;color:var(--color-neutral-700);padding:13px 16px;font:600 12.5px/1 var(--font-body);text-align:left;cursor:pointer" style-hover="border-color:var(--color-text);color:var(--color-text);background:var(--color-neutral-200)">Brand not listed? Type its name in the search box to add it.</button>
+          </sc-if>
+
+          <div style="{{ brandBarStyle }}">
+            <div style="display:grid;grid-template-columns:1fr auto;gap:8px">
+              <button onClick="{{ saveBrands }}" style="{{ brandCtaStyle }}"><span>{{ brandCtaLabel }}</span><span style="font-size:12px">→</span></button>
+              <button onClick="{{ skipBrands }}" style="border:2px solid var(--color-text);background:transparent;color:var(--color-text);padding:13px 16px;font:600 13px/1 var(--font-body);cursor:pointer" style-hover="background:var(--color-neutral-200)" style-active="background:var(--color-neutral-300)">Skip</button>
+            </div>
+          </div>
         </div>
       </sc-if>
 
@@ -374,208 +450,7 @@ a:hover{color:var(--color-text)}
         </div>
       </sc-if>
 
-      <!-- ══ BRANDS ══ -->
-      <sc-if value="{{ atBrands }}" hint-placeholder-val="{{ true }}">
-        <div style="padding-top:22px;display:flex;flex-direction:column;gap:16px">
-          <div>
-            <h2 style="{{ brandTitleStyle }}">Who do you <i style="font-weight:500">actually</i> shop?</h2>
-            <p style="margin:10px 0 0;font-size:13.5px;line-height:1.45;color:var(--color-neutral-800)">Mark up to five. Your week gets built from these first, and we stop showing you the rest.</p>
-          </div>
-
-          <div style="position:sticky;top:58px;z-index:20;background:var(--color-bg);padding-bottom:10px">
-            <input type="search" placeholder="Search 100 labels, or type your own" ref="{{ searchRef }}" value="{{ brandQuery }}" onInput="{{ setBrandQuery }}" style="width:100%;border:2px solid var(--color-text);background:var(--color-neutral-100);padding:14px;font:400 14px/1 var(--font-body);color:var(--color-text)" style-focus="outline:none;background:var(--color-bg)">
-
-            <div style="display:flex;gap:4px;overflow-x:auto;padding:10px 0 0">
-              <sc-for list="{{ segments }}" as="g" hint-placeholder-count="9">
-                <button onClick="{{ g.pick }}" style="{{ g.style }}">{{ g.label }}</button>
-              </sc-for>
-            </div>
-
-            <div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--color-text);padding:10px 0 8px">
-              <span style="font:700 10px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase">{{ pickedLabel }}</span>
-              <span style="font:600 10px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">{{ resultCount }}</span>
-            </div>
-          </div>
-
-          <sc-if value="{{ hasPicks }}">
-            <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:-6px">
-              <sc-for list="{{ picked }}" as="p" hint-placeholder-count="0">
-                <button onClick="{{ p.toggle }}" style="display:flex;align-items:center;gap:8px;border:none;background:var(--color-text);color:var(--color-neutral-100);padding:9px 12px;font:600 12px/1 var(--font-body);cursor:pointer" style-hover="background:var(--color-neutral-800)">
-                  <span>{{ p.name }}</span><span style="font-size:13px;opacity:.7">×</span>
-                </button>
-              </sc-for>
-            </div>
-          </sc-if>
-
-          <div style="{{ brandGridStyle }}">
-            <sc-for list="{{ brandTiles }}" as="b" hint-placeholder-count="24">
-              <button onClick="{{ b.toggle }}" style="{{ b.style }}">
-                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px;width:100%">
-                  <span style="{{ b.markStyle }}">{{ b.initials }}</span>
-                  <span style="{{ b.tickStyle }}">{{ b.tick }}</span>
-                </div>
-                <div style="width:100%">
-                  <div style="{{ b.nameStyle }}">{{ b.name }}</div>
-                  <div style="display:flex;justify-content:space-between;gap:6px;margin-top:5px;font:600 9.5px/1 var(--font-body);letter-spacing:.1em;text-transform:uppercase;opacity:.66">
-                    <span>{{ b.segment }}</span><span>{{ b.priceLabel }}</span>
-                  </div>
-                </div>
-              </button>
-            </sc-for>
-          </div>
-
-          <sc-if value="{{ canAddBrand }}">
-            <div style="background:var(--color-surface);border:1px solid var(--color-divider);padding:16px">
-              <div style="font-size:13.5px;font-weight:600;line-height:1.3">{{ addPrompt }}</div>
-              <p style="margin:6px 0 0;font-size:12.5px;color:var(--color-neutral-700)">Add it and we will treat it like any other label in your week.</p>
-              <button onClick="{{ addBrand }}" style="margin-top:12px;width:100%;border:none;background:var(--color-text);color:var(--color-neutral-100);padding:13px 16px;font:700 12.5px/1 var(--font-body);text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center" style-hover="background:var(--color-neutral-800)"><span>{{ addLabel }}</span><span style="font-size:13px">+</span></button>
-            </div>
-          </sc-if>
-
-          <sc-if value="{{ showAddHint }}">
-            <button onClick="{{ focusSearch }}" style="border:1px dashed var(--color-neutral-500);background:transparent;color:var(--color-neutral-700);padding:13px 16px;font:600 12.5px/1 var(--font-body);text-align:left;cursor:pointer" style-hover="border-color:var(--color-text);color:var(--color-text);background:var(--color-neutral-200)">Brand not listed? Type its name in the search box to add it.</button>
-          </sc-if>
-
-          <div style="{{ brandBarStyle }}">
-            <div style="display:grid;grid-template-columns:1fr auto;gap:8px">
-              <button onClick="{{ saveBrands }}" style="{{ brandCtaStyle }}"><span>{{ brandCtaLabel }}</span><span style="font-size:12px">→</span></button>
-              <button onClick="{{ skipBrands }}" style="border:2px solid var(--color-text);background:transparent;color:var(--color-text);padding:13px 16px;font:600 13px/1 var(--font-body);cursor:pointer" style-hover="background:var(--color-neutral-200)" style-active="background:var(--color-neutral-300)">Skip</button>
-            </div>
-          </div>
-        </div>
-      </sc-if>
-
-      <!-- ══ TODAY ══ -->
-      <sc-if value="{{ atToday }}" hint-placeholder-val="{{ true }}">
-        <div style="padding-top:18px;display:flex;flex-direction:column;gap:18px">
-          <div style="display:flex;gap:2px">
-            <sc-for list="{{ week }}" as="d" hint-placeholder-count="7">
-              <button onClick="{{ d.pick }}" style="{{ d.chipStyle }}">
-                <span style="font:700 9.5px/1 var(--font-body);letter-spacing:.12em">{{ d.short }}</span>
-                <span style="{{ d.dotStyle }}"></span>
-              </button>
-            </sc-for>
-          </div>
-
-          <div>
-            <div style="font:700 10px/1 var(--font-body);letter-spacing:.18em;text-transform:uppercase;color:var(--burgundy)">{{ dayHeadline }}</div>
-            <h2 style="margin:10px 0 0;font-family:var(--font-display);font-weight:500;font-size:42px;line-height:.86;letter-spacing:-.02em;text-transform:uppercase">{{ dayOccasion }}</h2>
-          </div>
-
-          <div style="{{ dayBlocksStyle }}">
-            <sc-for list="{{ dayColors }}" as="c" hint-placeholder-count="2">
-              <div style="{{ c.blockStyle }}">
-                <span style="{{ c.labelStyle }}">{{ c.name }}</span>
-              </div>
-            </sc-for>
-          </div>
-
-          <div style="display:flex;border-top:2px solid var(--color-text)">
-            <div style="width:26px;flex:none;background:var(--burgundy);color:var(--color-neutral-100);display:flex;align-items:center;justify-content:center">
-              <span style="writing-mode:vertical-rl;transform:rotate(180deg);font:600 8px/1 var(--font-body);letter-spacing:.28em;text-transform:uppercase">Wear this</span>
-            </div>
-            <div style="flex:1;min-width:0">
-            <sc-for list="{{ dayItems }}" as="i" hint-placeholder-count="3">
-              <div style="{{ i.rowStyle }}">
-                <span style="font:700 10px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;width:78px;flex:none;color:var(--color-neutral-700)">{{ i.slot }}</span>
-                <span style="{{ i.swatchStyle }}"></span>
-                <span style="flex:1;min-width:0;display:flex;flex-wrap:wrap;gap:0 8px;align-items:baseline">
-                  <span style="font-size:13.5px;font-weight:600">{{ i.colour }}</span>
-                  <span style="font-size:12.5px;color:var(--color-neutral-700)">{{ i.material }}</span>
-                </span>
-              </div>
-            </sc-for>
-            <p style="margin:12px 0 0;padding-left:14px;font-family:var(--font-display);font-style:italic;font-weight:500;font-size:16px;line-height:1.35;color:var(--color-text)">{{ dayNote }}</p>
-            </div>
-          </div>
-
-          <div style="display:grid;grid-template-columns:1fr auto;gap:8px">
-            <button onClick="{{ wearThis }}" style="{{ wearStyle }}">{{ wearLabel }}</button>
-            <button onClick="{{ shuffle }}" style="border:2px solid var(--color-text);background:transparent;color:var(--color-text);padding:13px 16px;font:600 13px/1 var(--font-body);cursor:pointer" style-hover="background:var(--color-neutral-200)" style-active="background:var(--color-neutral-300)">Reroll</button>
-          </div>
-
-          <div style="border-top:2px solid var(--color-text);padding-top:12px">
-            <div style="font:700 10px/1 var(--font-body);letter-spacing:.18em;text-transform:uppercase;color:var(--color-neutral-700)">Rest of the week</div>
-            <sc-for list="{{ weekRest }}" as="d" hint-placeholder-count="4">
-              <button onClick="{{ d.pick }}" style="width:100%;border:1px solid var(--color-divider);background:var(--color-surface);padding:12px 14px;margin-bottom:-1px;display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left;color:var(--color-text)" style-hover="background:var(--color-neutral-300)" style-active="background:var(--color-neutral-400)">
-                <span style="font:700 10px/1 var(--font-body);letter-spacing:.14em;width:34px">{{ d.short }}</span>
-                <span style="display:flex;gap:2px">
-                  <sc-for list="{{ d.colors }}" as="c" hint-placeholder-count="2"><span style="{{ c.miniStyle }}"></span></sc-for>
-                </span>
-                <span style="flex:1;font-size:13px;color:var(--color-neutral-800)">{{ d.occasion }}</span>
-                <span style="font-size:12px;color:var(--color-neutral-500)">→</span>
-              </button>
-            </sc-for>
-          </div>
-
-          <div style="{{ weekFigStyle }}">
-            <image-slot id="week-figure" shape="rect" fit="cover" src="./editorial-figure.jpg" placeholder="Editorial shot"></image-slot>
-          </div>
-          <div style="position:relative;background:var(--burgundy);color:var(--color-neutral-100);padding:20px 18px 22px;overflow:hidden">
-            <div style="font:700 10px/1 var(--font-body);letter-spacing:.18em;text-transform:uppercase;opacity:.8">Monday, 07:00</div>
-            <div style="margin-top:10px;max-width:78%;font-family:var(--font-display);font-weight:500;font-size:26px;line-height:.98;letter-spacing:-.01em">A fresh week lands <i>before your alarm</i> does.</div>
-            <div style="position:absolute;right:-6px;bottom:-14px;font-family:var(--font-display);font-size:120px;line-height:1;opacity:.16;pointer-events:none">07</div>
-          </div>
-        </div>
-      </sc-if>
-
-      <!-- ══ DNA TAB ══ -->
-      <sc-if value="{{ atDna }}" hint-placeholder-val="{{ true }}">
-        <div style="padding-top:18px;display:flex;flex-direction:column;gap:16px">
-          <div style="{{ dnaCardStyle }}">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
-              <div style="font:700 10px/1 var(--font-body);letter-spacing:.18em;text-transform:uppercase;opacity:.85">{{ indexLabel }}</div>
-              <svg viewBox="0 0 100 100" style="width:76px;height:76px;flex:none;fill:var(--color-neutral-100);opacity:.9;margin:-4px -2px 0 0">
-                <sc-for list="{{ markPaths }}" as="m" hint-placeholder-count="0"><path d="{{ m.d }}"></path></sc-for>
-              </svg>
-            </div>
-            <div style="margin-top:16px;font-family:var(--font-display);font-weight:500;font-size:44px;line-height:.86;letter-spacing:-.02em;text-transform:uppercase">
-              <span style="color:var(--burgundy-lift)">{{ nameFirst }}</span> <i style="font-weight:500">{{ nameSecond }}</i>
-            </div>
-            <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;font:700 10px/1 var(--font-body);letter-spacing:.18em">
-              <sc-for list="{{ traits }}" as="t" hint-placeholder-count="3"><span>{{ t }}</span></sc-for>
-            </div>
-          </div>
-
-          <div style="margin-top:2px">
-            <sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
-              <div style="display:flex;justify-content:space-between;gap:16px;padding:12px 14px;background:var(--color-surface);border:1px solid var(--color-divider);margin-bottom:-1px;font-size:13.5px">
-                <span style="color:var(--color-neutral-700)">{{ s.k }}</span><b style="font-weight:600;text-align:right">{{ s.v }}</b>
-              </div>
-            </sc-for>
-          </div>
-
-          <div>
-            <div style="font:700 10px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-700)">Your working palette</div>
-            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px">
-              <sc-for list="{{ recPalette }}" as="c" hint-placeholder-count="6">
-                <div>
-                  <div style="{{ c.swatchStyle }}"></div>
-                  <div style="margin-top:5px;font-size:10.5px;line-height:1.25;color:var(--color-neutral-700)">{{ c.name }}</div>
-                </div>
-              </sc-for>
-            </div>
-          </div>
-
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-            <button onClick="{{ openShare }}" style="border:none;background:var(--color-text);color:var(--color-neutral-100);padding:15px 16px;font:700 13px/1 var(--font-body);text-align:left;cursor:pointer" style-hover="background:var(--color-neutral-800)" style-active="background:var(--color-neutral-700)">Put it online</button>
-            <button onClick="{{ goRefine }}" style="border:2px solid var(--color-text);background:transparent;color:var(--color-text);padding:13px 16px;font:600 13px/1 var(--font-body);text-align:left;cursor:pointer" style-hover="background:var(--color-neutral-200)" style-active="background:var(--color-neutral-300)">Correct us</button>
-          </div>
-          <button onClick="{{ goBrands }}" style="width:100%;border:2px solid var(--color-text);background:transparent;color:var(--color-text);padding:13px 16px;font:600 13px/1 var(--font-body);text-align:left;cursor:pointer" style-hover="background:var(--color-neutral-200)" style-active="background:var(--color-neutral-300)">{{ brandsSummary }}</button>
-          <button onClick="{{ restart }}" style="border:none;background:transparent;padding:6px 0;font:600 12px/1 var(--font-body);text-decoration:underline;text-underline-offset:3px;text-align:left;cursor:pointer;color:var(--color-neutral-700)">Start over, read me again</button>
-        </div>
-      </sc-if>
-
     </main>
-
-    <!-- ══ TAB BAR ══ -->
-    <sc-if value="{{ showBottomTabs }}">
-      <div style="position:fixed;left:0;right:0;bottom:0;z-index:60;border-top:2px solid var(--color-text);background:var(--color-bg);display:grid;grid-template-columns:1fr 1fr;padding-bottom:env(safe-area-inset-bottom,0px)">
-        <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="2">
-          <button onClick="{{ t.pick }}" style="{{ t.style }}">{{ t.label }}</button>
-        </sc-for>
-      </div>
-    </sc-if>
 
     <!-- ══ EMAIL GATE ══ -->
     <sc-if value="{{ gateOpen }}">
@@ -655,7 +530,7 @@ a:hover{color:var(--color-text)}
     <canvas width="1080" height="1920" ref="{{ canvasRef }}" style="display:none"></canvas>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1100,&quot;height&quot;:1040},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;intro&quot;,&quot;upload&quot;,&quot;reveal&quot;,&quot;brands&quot;,&quot;today&quot;,&quot;dna&quot;],&quot;default&quot;:&quot;intro&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototype&quot;},&quot;sampleIdentity&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;rotate&quot;,&quot;achromatic&quot;,&quot;neutral&quot;,&quot;muted&quot;,&quot;rich&quot;,&quot;vivid&quot;],&quot;default&quot;:&quot;rotate&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototype&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1100,&quot;height&quot;:1040},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;intro&quot;,&quot;upload&quot;,&quot;reveal&quot;,&quot;brands&quot;,&quot;walkin&quot;,&quot;dna&quot;],&quot;default&quot;:&quot;intro&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototype&quot;},&quot;sampleIdentity&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;rotate&quot;,&quot;achromatic&quot;,&quot;neutral&quot;,&quot;muted&quot;,&quot;rich&quot;,&quot;vivid&quot;],&quot;default&quot;:&quot;rotate&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototype&quot;}}">
 const CHIP = sel => `border:${sel ? '2px solid var(--color-text)' : '1px solid var(--color-divider)'};background:${sel ? 'var(--color-text)' : 'transparent'};color:${sel ? '#fff' : 'var(--color-text)'};padding:${sel ? '9px 13px' : '10px 14px'};font:600 12px/1 var(--font-body);cursor:pointer`;
 
 const PROC_LINES = [
@@ -673,9 +548,9 @@ const ACC = v => v < 25 ? 'Swing and a miss. Tell us where.'
 
 class Component extends DCLogic {
   state = {
-    screen: 'intro', tab: 'today', frames: [], result: null, monk: 4,
-    accuracy: 78, day: new Date().getDay() === 0 ? 6 : new Date().getDay() - 1,
-    seed: 0, worn: {}, shareOpen: false, brands: [], brandQuery: '', brandSeg: 'All', brandNote: '', dragging: false,
+    screen: 'intro', frames: [], result: null, monk: 4,
+    accuracy: 78,
+    seed: 0, saved: {}, shareOpen: false, brands: [], brandQuery: '', brandSeg: 'All', brandNote: '', dragging: false,
     procIdx: 0, procPct: 0, segPct: 0, tick: 0, procDone: false,
     gateOpen: false, gateError: '', gateBusy: false, leadStored: null, user: null, quota: null,
     sharing: false, shareNote2: '', isDesktop: false, dev: false, copied: false, engineNote: '',
@@ -690,18 +565,23 @@ class Component extends DCLogic {
     this.onMq = () => this.setState({ isDesktop: this.mq.matches });
     this.mq.addEventListener('change', this.onMq);
     this.setState({ isDesktop: this.mq.matches, dev: /[?&]dev\b/.test(location.search) });
-    this.refreshQuota(null);
-    this.resumeAuth();
+    // Neither of these may block the first render: if Supabase is unreachable
+    // the app still has to reach a usable screen.
+    try { this.refreshQuota(null); } catch (e) {}
+    try { this.resumeAuth(); } catch (e) {}
     const s = this.props.startScreen;
     if (s && s !== 'intro') {
       this.load().then(() => {
         const pin = this.props.sampleIdentity;
         const r = this.eng.demoResult(pin && pin !== 'rotate' ? pin : undefined);
-        const map = { upload: 'upload', reveal: 'reveal', brands: 'brands', today: 'app', dna: 'app' };
+        const map = { upload: 'upload', reveal: 'reveal', brands: 'brands', walkin: 'app', dna: 'app' };
+        const seeded = this.state.brands.length
+          ? this.state.brands
+          : (this.brandLib ? this.brandLib.suggestedFor(r.family, r.fit).slice(0, 3).map(b => b.id) : []);
         this.setState({
-          result: ['reveal', 'brands', 'today', 'dna'].includes(s) ? r : null,
+          result: ['reveal', 'brands', 'walkin', 'dna'].includes(s) ? r : null,
           monk: r.monk, screen: map[s] || 'intro',
-          tab: s === 'dna' ? 'dna' : 'today',
+          brands: s === 'brands' ? this.state.brands : seeded,
         });
       });
     }
@@ -922,7 +802,7 @@ class Component extends DCLogic {
       }, user.token);
       stored = res.stored;
     } catch (e) {}
-    this.setState({ gateBusy: false, gateOpen: false, gateError: '', screen: 'reveal', user, leadStored: stored });
+    this.setState({ gateBusy: false, gateOpen: false, gateError: '', screen: 'brands', user, leadStored: stored });
     this.recordRead(user, r);
   }
 
@@ -950,10 +830,10 @@ class Component extends DCLogic {
     this.setState({ result: latest, monk: latest.monk ?? this.state.monk, screen: 'reveal' });
   };
 
-  skipAuth = () => this.setState({ gateOpen: false, gateBusy: false, gateError: '', screen: 'reveal' });
+  skipAuth = () => this.setState({ gateOpen: false, gateBusy: false, gateError: '', screen: 'brands' });
   goRefine = () => this.setState({ screen: 'refine' });
-  saveRefine = () => this.setState({ screen: 'app', tab: 'today' });
-  enterApp = () => this.setState({ screen: 'brands' });
+  saveRefine = () => this.setState({ screen: 'reveal' });
+  
 
   toggleBrand = id => this.setState(s => {
     const has = s.brands.includes(id);
@@ -963,9 +843,9 @@ class Component extends DCLogic {
     return { brands, brandNote: '' };
   });
 
-  saveBrands = () => this.setState({ screen: 'app', tab: 'today' });
-  skipBrands = () => this.setState({ screen: 'app', tab: 'today' });
-  restart = () => this.setState({ screen: 'intro', frames: [], result: null, worn: {}, saved: {} });
+  saveBrands = () => this.setState({ screen: 'reveal' });
+  skipBrands = () => this.setState({ screen: 'reveal' });
+  restart = () => this.setState({ screen: 'intro', frames: [], result: null, saved: {} });
 
   /* ── refine ── */
   setAccuracy = e => this.setState({ accuracy: +e.target.value });
@@ -1078,8 +958,6 @@ class Component extends DCLogic {
     const r = s.result;
     const meta = r && eng ? eng.SPECIES_META[r.species] : null;
     const screen = s.screen;
-    const inApp = screen === 'app';
-    const tab = s.tab;
 
     const good = s.frames.filter(f => f.status === 'ok').length;
     const busy = s.frames.some(f => f.status === 'busy');
@@ -1089,16 +967,16 @@ class Component extends DCLogic {
     const ready = good >= 3 && !busy;
     const partialCount = s.frames.filter(x => x.status === 'ok' && !x.analysis?.fit).length;
 
-    const week = r && eng ? eng.weekPlan(r, s.seed) : [];
-    const today = week[s.day] || null;
     const recPal = r && eng ? eng.recommendPalette(s.monk, r.undertone, r.family) : [];
 
     // Gutter width of the main column, so full-bleed elements can cancel it.
     const pad = s.isDesktop ? 48 : 20;
 
     const BL = this.brandLib;
-    const brandResults = BL ? BL.searchBrands(s.brandQuery, s.brandSeg) : [];
-
+    const rawResults = BL ? BL.searchBrands(s.brandQuery, s.brandSeg) : [];
+    const brandResults = rawResults;
+    // The labels the visitor actually picked, resolved to full records.
+    const pickedBrands = BL ? s.brands.map(id => BL.allBrands().find(b => b.id === id)).filter(Boolean) : [];
     const mini = hex => `width:10px;height:10px;background:${hex};display:block`;
     const onColor = hex => {
       const n = parseInt(hex.slice(1), 16);
@@ -1110,26 +988,23 @@ class Component extends DCLogic {
       /* nav */
       atIntro: screen === 'intro', atUpload: screen === 'upload', atProc: screen === 'proc',
       atTeaser: screen === 'teaser', atReveal: screen === 'reveal', atRefine: screen === 'refine',
-      atBrands: screen === 'brands', atToday: inApp && tab === 'today', atDna: inApp && tab === 'dna',
-      showBottomTabs: inApp && !s.isDesktop,
-      showTopNav: inApp && s.isDesktop,
+      atBrands: screen === 'brands',
       showDevNav: !!s.dev || !!this.props.showDevNav,
       headerStyle: `position:sticky;top:0;z-index:50;flex:none;display:flex;justify-content:space-between;align-items:center;gap:16px;background:var(--color-bg);border-bottom:2px solid var(--color-text);padding:${s.isDesktop ? '18px 48px' : '16px 20px'}`,
-      mainStyle: `flex:1;width:100%;display:flex;flex-direction:column;margin:0 auto;${s.isDesktop ? 'max-width:760px;padding:0 48px 80px' : `padding:0 20px ${inApp ? 104 : 40}px`}`,
+      mainStyle: `flex:1;width:100%;display:flex;flex-direction:column;margin:0 auto;${s.isDesktop ? 'max-width:760px;padding:0 48px 80px' : 'padding:0 20px 40px'}`,
       heroWrapStyle: 'position:relative;margin-top:14px',
       heroTitleStyle: `position:relative;z-index:2;margin:0;max-width:${s.isDesktop ? '92%' : '100%'};font-family:var(--font-display);font-weight:500;font-size:${s.isDesktop ? 78 : 44}px;line-height:.86;letter-spacing:-.02em;text-transform:uppercase;pointer-events:none`,
       heroFigStyle: `position:relative;z-index:1;margin-top:${s.isDesktop ? -58 : -32}px;width:100%;aspect-ratio:16/9;filter:grayscale(1) contrast(1.02) brightness(1.06)`,
       seam: Array.from({ length: 14 }, (_, i) => ['EIGHTY IDENTITIES', '·', 'READ ON DEVICE', '·', 'FOUR PHOTOS', '·', 'NO UPLOAD', '·'][i % 8]),
       seamStyle: `margin-top:0;background:var(--color-text);color:var(--color-neutral-100);overflow:hidden;padding:8px 0;margin-left:-${pad}px;margin-right:-${pad}px`,
       heroStepsStyle: `margin-top:${s.isDesktop ? 40 : 26}px;display:grid;grid-template-columns:${s.isDesktop ? 'repeat(4,1fr)' : '1fr 1fr'};gap:2px;background:var(--color-divider);border-top:2px solid var(--color-text);border-bottom:2px solid var(--color-text)`,
-      barTitle: inApp ? (tab === 'today' ? 'Today' : 'Your DNA')
-        : screen === 'brands' ? 'Your brands'
+      barTitle: screen === 'brands' ? 'Your brands'
         : screen === 'refine' ? 'Correct us'
         : screen === 'upload' || screen === 'proc' ? 'The read'
         : screen === 'teaser' || screen === 'reveal' ? 'Your identity' : '',
       barRight: screen === 'upload' ? '01 / 04' : screen === 'proc' ? '02 / 04'
         : screen === 'teaser' ? '03 / 04' : screen === 'reveal' ? '04 / 04'
-        : inApp ? new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) : '80 identities',
+        : '80 identities',
 
       jumps: [
         ['Intro', () => this.setState({ screen: 'intro' })],
@@ -1138,7 +1013,6 @@ class Component extends DCLogic {
         ['Reveal', () => r ? this.setState({ screen: 'reveal' }) : this.goDemo()],
         ['Correct us', () => r ? this.setState({ screen: 'refine' }) : this.goDemo()],
         ['Brands', () => r ? this.setState({ screen: 'brands' }) : this.goDemo()],
-        ['Today', () => r ? this.setState({ screen: 'app', tab: 'today' }) : this.goDemo()],
       ].map(([label, go]) => ({ label, go })),
 
       steps: [
@@ -1308,7 +1182,6 @@ class Component extends DCLogic {
       readout: r ? `${r.shares.family}% ${r.family} · ${r.shares.texture}% ${r.texture} · ${r.shares.fit}% ${r.fit} — dominant: ${r.palette.slice(0, 3).map(c => c.name).join(', ')}` : '',
       unlock: this.unlock,
       goRefine: this.goRefine,
-      enterApp: this.enterApp,
       restart: this.restart,
 
       /* refine */
@@ -1371,7 +1244,8 @@ class Component extends DCLogic {
         const on = s.brands.includes(b.id);
         const full = !on && s.brands.length >= 5;
         return {
-          name: b.name, segment: b.segment, priceLabel: b.priceLabel, initials: b.initials,
+          name: b.name, segment: b.segment, initials: b.initials,
+          priceLabel: b.priceLabel,
           tick: on ? '✓' : '',
           toggle: () => this.toggleBrand(b.id),
           style: `display:flex;flex-direction:column;justify-content:space-between;gap:20px;min-height:118px;text-align:left;border:none;padding:12px;cursor:${full ? 'not-allowed' : 'pointer'};background:${on ? 'var(--color-text)' : 'var(--color-surface)'};color:${on ? 'var(--color-neutral-100)' : 'var(--color-text)'};opacity:${full ? .45 : 1}`,
@@ -1380,56 +1254,22 @@ class Component extends DCLogic {
           nameStyle: 'font-size:13.5px;font-weight:600;line-height:1.2;text-wrap:pretty',
         };
       }),
-      brandCtaLabel: s.brands.length ? `Build my week around these ${s.brands.length}` : 'Build my week',
+      brandCtaLabel: s.brands.length ? `Save these ${s.brands.length} and reveal` : 'Reveal my identity',
       brandCtaStyle: 'border:none;background:var(--color-text);color:var(--color-neutral-100);padding:16px 18px;font:700 13.5px/1 var(--font-body);text-align:left;display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer',
       // Sticks to the bottom of the viewport so the two actions are always reachable.
       brandBarStyle: `position:sticky;bottom:0;z-index:30;margin:4px -20px 0;padding:12px 20px calc(12px + env(safe-area-inset-bottom,0px));background:var(--color-bg);border-top:2px solid var(--color-text);box-shadow:0 -10px 24px ${s.isDesktop ? 'rgba(32,30,29,.10)' : 'rgba(32,30,29,.14)'}`,
-      goBrands: () => this.setState({ screen: 'brands' }),
       brandsSummary: s.brands.length ? `Your ${s.brands.length} brands` : 'Pick your brands',
       saveBrands: this.saveBrands,
       skipBrands: this.skipBrands,
 
-      /* today */
-      week: week.map((d, i) => ({
-        short: d.short,
-        chipStyle: `flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:9px 0;border:none;cursor:pointer;background:${i === s.day ? 'var(--color-text)' : 'var(--color-neutral-200)'};color:${i === s.day ? '#fff' : 'var(--color-neutral-700)'}`,
-        dotStyle: `width:14px;height:4px;background:${s.worn[i] ? 'var(--color-text)' : d.colors[0].hex}`,
-        pick: () => this.setState({ day: i }),
-      })),
-      dayBlocksStyle: `display:flex;height:${s.isDesktop ? 280 : 200}px;border-top:2px solid var(--color-text);border-bottom:2px solid var(--color-text)`,
-      dayHeadline: today ? (s.day === (new Date().getDay() === 0 ? 6 : new Date().getDay() - 1) ? `Today · ${today.day}` : today.day) : '',
-      dayOccasion: today ? today.occasion : '',
-      dayColors: today ? today.colors.map((c, i) => ({
+      /* walk-in */
+      walkKicker: pickedBrands.length ? `${pickedBrands.length} ${pickedBrands.length === 1 ? 'label' : 'labels'} · ${recPal.length} colours` : 'Nothing picked yet',
+      walkTitleStyle: `margin:8px 0 0;font-family:var(--font-display);font-weight:500;font-size:${s.isDesktop ? 44 : 34}px;line-height:.88;letter-spacing:-.02em;text-transform:uppercase`,
+      matrixStyle: 'display:flex;height:72px;border-top:2px solid var(--color-text);border-bottom:2px solid var(--color-text)',
+      matrixCols: recPal.map(c => ({
         name: c.name,
-        blockStyle: `flex:${[1.5, 1, 0.65][i] ?? 1};background:${c.hex};position:relative;display:flex;align-items:flex-end;padding:10px`,
-        labelStyle: `font:700 10px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:${onColor(c.hex)}`,
-      })) : [],
-      dayItems: today ? today.items.map(it => ({
-        slot: it.slot,
-        colour: it.color ? it.color.name : 'None',
-        material: it.material || 'skip the layer today',
-        swatchStyle: it.color
-          ? `width:20px;height:20px;flex:none;background:${it.color.hex}${it.color.hex.toUpperCase() === '#FFFFFF' ? ';box-shadow:inset 0 0 0 1px var(--color-neutral-400)' : ''}`
-          : 'width:20px;height:20px;flex:none;background:transparent;box-shadow:inset 0 0 0 1px var(--color-neutral-400)',
-        rowStyle: `display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--color-surface);border:1px solid var(--color-divider);margin-bottom:-1px${it.color ? '' : ';opacity:.6'}`,
-      })) : [],
-      dayNote: today ? today.note : '',
-      wearThis: () => this.setState(st => ({ worn: { ...st.worn, [st.day]: !st.worn[st.day] } })),
-      wearLabel: s.worn[s.day] ? 'Wearing it ✓' : 'Wear this today',
-      wearStyle: `border:none;background:${s.worn[s.day] ? 'var(--color-neutral-700)' : 'var(--color-text)'};color:var(--color-neutral-100);padding:15px 16px;font:700 13px/1 var(--font-body);text-align:left;cursor:pointer`,
-      shuffle: () => this.setState(st => ({ seed: st.seed + 1 })),
-      weekRest: week.map((d, i) => ({ ...d, i })).filter(d => d.i !== s.day).slice(0, 4).map(d => ({
-        short: d.short, occasion: d.occasion,
-        colors: d.colors.map(c => ({ miniStyle: mini(c.hex) })),
-        pick: () => this.setState({ day: d.i }),
-      })),
-
-      /* tabs */
-      tabs: [['today', 'Today'], ['dna', 'Your DNA']].map(([k, label]) => ({
-        label,
-        topStyle: `border:none;background:${tab === k ? 'var(--color-text)' : 'transparent'};color:${tab === k ? 'var(--color-neutral-100)' : 'var(--color-neutral-700)'};padding:10px 14px;font:700 10.5px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;cursor:pointer`,
-        style: `border:none;background:${tab === k ? 'var(--color-text)' : 'transparent'};color:${tab === k ? 'var(--color-neutral-100)' : 'var(--color-neutral-700)'};padding:16px 0 18px;font:700 10.5px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;cursor:pointer`,
-        pick: () => this.setState({ tab: k }),
+        style: `flex:1;background:${c.hex};display:flex;align-items:flex-end;padding:7px 6px;min-width:0`,
+        labelStyle: `font:700 8px/1.1 var(--font-body);letter-spacing:.1em;text-transform:uppercase;color:${onColor(c.hex)};overflow:hidden`,
       })),
 
       /* overlays: bottom sheet on mobile, centred modal on desktop */
